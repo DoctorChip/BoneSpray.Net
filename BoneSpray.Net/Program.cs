@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Windows.Forms;
 using Bonespray.Net;
 using BoneSpray.Net.Scenes;
 using BoneSpray.Net.Services;
+using BoneSpray.Net.Visuals.Scenes;
 using JackSharp.Ports;
 
 namespace BoneSpray.Net
@@ -21,6 +23,9 @@ namespace BoneSpray.Net
             // Fire up the JACK server, and start all of the defined ports from above.
             InitaliseJack();
 
+            // Fire up our visuals woo
+            InitaliseOpenGL();
+
             // Keep Alive
             HangForInput();
         }
@@ -38,6 +43,14 @@ namespace BoneSpray.Net
             var startedPorts = PortControlService.ConnectAllPorts();
             if (!startedPorts) throw new Exception("Unable to connect ports to JACK client.");
 
+        }
+
+        [STAThread]
+        static void InitaliseOpenGL()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new TestScene());
         }
 
         /// <summary>
