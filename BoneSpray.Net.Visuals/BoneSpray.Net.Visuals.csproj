@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D15EB51A-09D9-42B4-A9DB-D52E2FA3C335}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>BoneSpray.Net</RootNamespace>
-    <AssemblyName>BoneSpray.Net</AssemblyName>
+    <ProjectGuid>{31E4EC60-B3D0-47DB-9D14-F709A092787F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BoneSpray.Net.Visuals</RootNamespace>
+    <AssemblyName>BoneSpray.Net.Visuals</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,9 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JackSharp, Version=0.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\JackSharp.0.4.0\lib\net35\JackSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,28 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\ProcessBufferExtensions.cs" />
-    <Compile Include="Models\PortContainer.cs" />
-    <Compile Include="Models\SimpleMidiEvent.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenes\Attributes\KeybindAttribute.cs" />
-    <Compile Include="Scenes\Attributes\RequiredPortAttribute.cs" />
-    <Compile Include="Scenes\Attributes\SceneKeyAttribute.cs" />
-    <Compile Include="Scenes\Attributes\StartupSceneAttribute.cs" />
-    <Compile Include="Scenes\BaseScene.cs" />
-    <Compile Include="Scenes\IBaseScene.cs" />
-    <Compile Include="Scenes\Implementations\TestScene.cs" />
-    <Compile Include="Scenes\SceneOrchestrator.cs" />
-    <Compile Include="Services\ClientControlService.cs" />
-    <Compile Include="Services\PortControlService.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Contracts\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

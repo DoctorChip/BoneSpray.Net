@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28306.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoneSpray.Net", "BoneSpray.Net\BoneSpray.Net.csproj", "{D15EB51A-09D9-42B4-A9DB-D52E2FA3C335}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoneSpray.Net.Visuals", "BoneSpray.Net.Visuals\BoneSpray.Net.Visuals.csproj", "{31E4EC60-B3D0-47DB-9D14-F709A092787F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D15EB51A-09D9-42B4-A9DB-D52E2FA3C335}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D15EB51A-09D9-42B4-A9DB-D52E2FA3C335}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D15EB51A-09D9-42B4-A9DB-D52E2FA3C335}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31E4EC60-B3D0-47DB-9D14-F709A092787F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31E4EC60-B3D0-47DB-9D14-F709A092787F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31E4EC60-B3D0-47DB-9D14-F709A092787F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31E4EC60-B3D0-47DB-9D14-F709A092787F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

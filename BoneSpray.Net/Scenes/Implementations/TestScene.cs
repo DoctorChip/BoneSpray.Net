@@ -1,61 +1,50 @@
-﻿using BoneSpray.Net.Models;
+﻿using System;
+using System.Collections.Generic;
+using BoneSpray.Net.Extensions;
+using BoneSpray.Net.Models;
 using BoneSpray.Net.Scenes.Attributes;
 using JackSharp.Ports;
 using JackSharp.Processing;
-using System;
-using System.Collections.Generic;
 
 namespace BoneSpray.Net.Scenes.Implementations
 {
+    [Keybind('1')]
+    [StartupScene]
     [SceneKey("TEST_SCENE")]
-    [RequiredPort(Type: PortType.Midi, PortName: "1", CallbackName: nameof(ProcessMidiOne))]
-    [RequiredPort(Type: PortType.Audio, PortName: "1", CallbackName: nameof(ProcessAudioOne))]
+    [RequiredPort(Type: PortType.Midi, PortName: "1", CallbackName: nameof(ProcessMidiOneEvent))]
+    [RequiredPort(Type: PortType.Audio, PortName: "1", CallbackName: nameof(ProcessAudioOneEvent))]
     public class TestScene : BaseScene
     {
         /// <summary>
         /// Action handler for Midi port 1.
         /// </summary>
-        /// See: https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes
-        public Action<ProcessBuffer> ProcessMidiOne => ProcessMidiOneEvent;
         public void ProcessMidiOneEvent(ProcessBuffer buffer)
         {
-            if (buffer.MidiIn.Length == 0) return;
-            foreach (MidiEventCollection<MidiInEvent> midi in buffer.MidiIn)
+            var notes = buffer.GetSimpleEvents();
+            if (notes.Count != 0)
             {
-                var notes = new List<SimpleMidiEvent>();
-
-                foreach (var val in midi)
-                {
-                    var note = val.MidiData;
-
-                    // 144 = Cha1 ON, 128 = Cha1 OFF
-                    notes.Add(new SimpleMidiEvent
-                    {
-                        Type = note[0] == 144 ? MidiEventType.ON : MidiEventType.OFF,
-                        Note = note[1],
-                        Velocity = note[2],
-                    });
-                }
-
                 MidiBroadcastBuffer?.Invoke(notes);
             }
         }
 
         /// <summary>
-        /// Our simple midi output buffer stream wooooo.
-        /// Subscribe for more!
+        /// Action handler for Audio port 1.
+        /// </summary>
+        public void ProcessAudioOneEvent(ProcessBuffer buffer)
+        {
+            if (buffer.AudioIn.Length == 0) return;
+            AudioBroadcastBuffer?.Invoke(buffer.AudioIn);
+        }
+
+        /// <summary>
+        /// Our midi output buffer stream.
         /// </summary>
         public Action<IEnumerable<SimpleMidiEvent>> MidiBroadcastBuffer { get; set; }
 
+
         /// <summary>
-        /// Action handler for Audio port 1.
+        /// Our audio output buffer stream.
         /// </summary>
-        public Action<ProcessBuffer> ProcessAudioOne => ProcessAudioOneEvent;
-        public void ProcessAudioOneEvent(ProcessBuffer buffer)
-        {
-            // To complete  :)
-            if (buffer.AudioIn.Length == 0) return;
-            Console.WriteLine(buffer.AudioIn.GetValue(0));
-        }
+        public Action<AudioBuffer[]> AudioBroadcastBuffer { get; set; }
     }
 }

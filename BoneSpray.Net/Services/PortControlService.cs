@@ -8,18 +8,15 @@ namespace BoneSpray.Net.Services
 {
     public static class PortControlService
     {
-        public static Dictionary<string, PortContainer> AudioPorts;
-        public static Dictionary<string, PortContainer> MidiPorts;
+        /// <summary>
+        /// Hold onto all existing ports.
+        /// </summary>
+        public static Dictionary<string, PortContainer> AudioPorts = new Dictionary<string, PortContainer>();
+        public static Dictionary<string, PortContainer> MidiPorts = new Dictionary<string, PortContainer>();
 
         /// <summary>
-        /// Initalise our static port controller.
+        /// Loop through all of our ports and connect them to JACK.
         /// </summary>
-        public static void Initalise()
-        {
-            AudioPorts = new Dictionary<string, PortContainer>();
-            MidiPorts = new Dictionary<string, PortContainer>();
-        }
-
         public static bool ConnectAllPorts()
         {
             var result = true;
@@ -44,9 +41,7 @@ namespace BoneSpray.Net.Services
         /// </summary>
         public static bool PortExists(string name, PortType type)
         {
-            return type == PortType.Midi ?
-                MidiPorts.ContainsKey(name) :
-                AudioPorts.ContainsKey(name);
+            return type == PortType.Midi ? MidiPorts.ContainsKey(name) : AudioPorts.ContainsKey(name);
         }
 
         /// <summary>

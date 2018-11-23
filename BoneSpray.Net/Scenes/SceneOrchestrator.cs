@@ -1,6 +1,8 @@
-﻿using BoneSpray.Net.Scenes.Attributes;
+﻿using BoneSpray.Net.Models;
+using BoneSpray.Net.Scenes.Attributes;
 using BoneSpray.Net.Services;
 using JackSharp.Ports;
+using JackSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +19,6 @@ namespace BoneSpray.Net.Scenes
         private static Dictionary<string, IBaseScene> _scenes = new Dictionary<string, IBaseScene>();
 
         /// <summary>
-        /// The scene type that all of our scenes extend from.
-        /// </summary>
-        private static readonly Type sceneBase = typeof(BaseScene);
-
-        /// <summary>
         /// Use reflection to find all of our scenes and add them to this static class for easier access,
         /// and to keep them in memory. :)
         /// </summary>
@@ -31,7 +28,7 @@ namespace BoneSpray.Net.Scenes
             var sceneTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(ass => ass.GetTypes())
                 .Where(type =>
-                    sceneBase.IsAssignableFrom(type) &&
+                    typeof(BaseScene).IsAssignableFrom(type) &&
                     type.IsClass && !type.IsAbstract);
 
             foreach (var type in sceneTypes)
@@ -58,57 +55,62 @@ namespace BoneSpray.Net.Scenes
         }
 
         /// <summary>
-        /// Finds the RequiredMidiPortNames property on each scene and hooks up the ports it asks for.
+        /// Finds the required ports on each scene and hooks up the ports it asks for.
         /// </summary>
         /// <returns>If successful, true</returns>
-        public static bool ConnectScenesMidiPorts()
+        public static bool ConnectScenesPorts(PortType type)
         {
             if (_scenes == null || _scenes.Count() == 0) return false;
 
             foreach (var scene in _scenes)
             {
-                var requiredPorts = scene.Value.RequiredMidiPortNames;
+                var attrs = GetPortAttributes(type, scene.Value);
+                var requiredPorts = attrs.Select(x => new
+                {
+                    Key = x.PortName,
+                    Callback = x.CallbackName,
+                });
+
                 foreach (var port in requiredPorts)
                 {
-                    if (!PortControlService.PortExists(port.Key, PortType.Midi))
+                    if (!PortControlService.PortExists(port.Key, type))
                     {
-                        var createdPort = PortControlService.CreatePort(port.Key, PortType.Midi);
+                        var createdPort = PortControlService.CreatePort(port.Key, type);
                         if (!createdPort) throw new Exception($"Unable to creat port: {port.Key}.");
                     }
 
-                    var existingPort = PortControlService.MidiPorts.Single(x => x.Key == port.Key);
-                    existingPort.Value.PortProcessor.ProcessFunc += port.Value;
+                    KeyValuePair<string, PortContainer> existingPort;
+                    if (type == PortType.Midi)
+                    {
+                        existingPort = PortControlService.MidiPorts.Single(x => x.Key == port.Key);
+                    }
+                    else
+                    {
+                        existingPort = PortControlService.AudioPorts.Single(x => x.Key == port.Key);
+                    }
+
+                    var portCallbackMethodInfo = scene.Value.GetType().GetMethod(port.Callback);
+                    var portCallback = (Action<ProcessBuffer>)Delegate.CreateDelegate(typeof(Action<ProcessBuffer>), scene.Value, portCallbackMethodInfo);
+                    existingPort.Value.PortProcessor.ProcessFunc += portCallback;
                 }
             }
 
             return true;
         }
+
         /// <summary>
-        /// Finds the RequiredAudioPortNames property on each scene and hooks up the ports it asks for.
-        /// TODO: Can this be combined generically with the above method?
+        /// Gets all the <see cref="RequiredPortAttribute"/> on a given IBaseScene.
         /// </summary>
-        /// <returns>If successful, true</returns>
-        public static bool ConnectScenesAudioPorts()
+        private static IEnumerable<RequiredPortAttribute> GetPortAttributes(PortType type, IBaseScene scene)
         {
-            if (_scenes == null || _scenes.Count() == 0) return false;
-
-            foreach (var scene in _scenes)
+            var attrs = scene.GetType().GetCustomAttributes(typeof(RequiredPortAttribute), true);
+            foreach (var attr in attrs)
             {
-                var requiredPorts = scene.Value.RequiredMidiPortNames;
-                foreach (var port in requiredPorts)
-                {
-                    if (!PortControlService.PortExists(port.Key, PortType.Audio))
-                    {
-                        var createdPort = PortControlService.CreatePort(port.Key, PortType.Audio);
-                        if (!createdPort) throw new Exception($"Unable to creat port: {port.Key}.");
-                    }
+                var castedAttr = (RequiredPortAttribute)attr;
+                if (castedAttr.Type != type) continue;
 
-                    var existingPort = PortControlService.AudioPorts.Single(x => x.Key == port.Key);
-                    existingPort.Value.PortProcessor.ProcessFunc += port.Value;
-                }
+                yield return castedAttr;
             }
-
-            return true;
         }
     }
 }

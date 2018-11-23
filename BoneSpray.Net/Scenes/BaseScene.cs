@@ -1,6 +1,4 @@
 ﻿using JackSharp.Ports;
-using JackSharp.Processing;
-using System;
 using System.Collections.Generic;
 
 namespace BoneSpray.Net.Scenes
