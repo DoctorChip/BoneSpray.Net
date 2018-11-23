@@ -50,6 +50,8 @@
     <Compile Include="Models\SimpleMidiEvent.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenes\Attributes\RequiredPortAttribute.cs" />
+    <Compile Include="Scenes\Attributes\SceneKeyAttribute.cs" />
     <Compile Include="Scenes\BaseScene.cs" />
     <Compile Include="Scenes\IBaseScene.cs" />
     <Compile Include="Scenes\Implementations\TestScene.cs" />

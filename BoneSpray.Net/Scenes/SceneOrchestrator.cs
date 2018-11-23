@@ -1,8 +1,10 @@
-﻿using BoneSpray.Net.Services;
+﻿using BoneSpray.Net.Scenes.Attributes;
+using BoneSpray.Net.Services;
 using JackSharp.Ports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace BoneSpray.Net.Scenes
 {
@@ -34,8 +36,21 @@ namespace BoneSpray.Net.Scenes
 
             foreach (var type in sceneTypes)
             {
+                string key = null;
                 IBaseScene instance = (IBaseScene)Activator.CreateInstance(type);
-                var key = instance.GetKey();
+               
+                var attr = type.GetCustomAttributes();
+
+                if (attr != null)
+                {
+                    var keyAttr = (SceneKeyAttribute)attr.SingleOrDefault(x => (x as SceneKeyAttribute) != null);
+                    if (keyAttr != null) {
+                        key = keyAttr.Key;
+                    }
+                }
+
+                if (key == null) throw new Exception($"Unable to find a SceneKey attribute for type: {type.FullName}.");
+
                 _scenes.Add(key, instance);
             }
 

@@ -10,27 +10,16 @@ namespace BoneSpray.Net.Scenes
         /// <summary>
         /// Scene Key. The key used to access and find scenes from the Orchestrator.
         /// </summary>
-        protected abstract string Key { get; }
-        public string GetKey() => Key;
+        protected string Key { get; }
 
         /// <summary>
-        /// The MIDI ports that this scene would like to subscribe to.
+        /// Live MIDI ports;
         /// </summary>
-        public abstract Dictionary<string, Action<ProcessBuffer>> RequiredMidiPortNames { get; }
-
-        /// <summary>
-        /// The live MIDI ports.
-        /// </summary>
-        public abstract List<MidiInPort> MidiPorts { get; protected set; }
-
-        /// <summary>
-        /// The Audio ports that this scene would like to subscribe to.
-        /// </summary>
-        public abstract Dictionary<string, Action<ProcessBuffer>> RequiredAudioPortNames { get; }
+        public List<MidiInPort> MidiPorts { get; protected set; }
 
         /// <summary>
         /// The live Audio ports.
         /// </summary>
-        public abstract List<AudioInPort> AudioPorts { get; protected set; }
+        public List<AudioInPort> AudioPorts { get; protected set; }
     }
 }
