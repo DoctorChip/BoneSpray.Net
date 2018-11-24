@@ -1,6 +1,6 @@
 ﻿using BoneSpray.Net.Models;
-using BoneSpray.Net.Scenes.Attributes;
-using BoneSpray.Net.Services;
+using BoneSpray.Net.Models.Attributes;
+using BoneSpray.Net.Scenes;
 using JackSharp.Ports;
 using JackSharp.Processing;
 using System;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace BoneSpray.Net.Scenes
+namespace BoneSpray.Net.Services
 {
     public static class SceneOrchestrator
     {

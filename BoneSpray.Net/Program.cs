@@ -24,7 +24,7 @@ namespace BoneSpray.Net
             InitaliseJack();
 
             // Fire up our visuals woo
-            VisualsControlService.InitialiseWindow();
+            VisualsControlService.Run();
 
             // Keep Alive
             HangForInput();

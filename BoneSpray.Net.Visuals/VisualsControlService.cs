@@ -16,7 +16,7 @@ namespace BoneSpray.Net.Visuals
         private static Shader _fragmentShader;
         private static Pipeline _pipeline;
 
-        public bool InitialiseWindow()
+        public bool Run()
         {
             WindowCreateInfo windowCI = new WindowCreateInfo()
             {
@@ -30,7 +30,7 @@ namespace BoneSpray.Net.Visuals
 
             Sdl2Window window = VeldridStartup.CreateWindow(ref windowCI);
 
-            _graphicsDevice = VeldridStartup.CreateGraphicsDevice(window);
+           _graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, GraphicsBackend.OpenGL);
 
             CreateResources();
 

@@ -248,19 +248,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\ProcessBufferExtensions.cs" />
-    <Compile Include="Models\PortContainer.cs" />
-    <Compile Include="Models\SimpleMidiEvent.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenes\Attributes\KeybindAttribute.cs" />
-    <Compile Include="Scenes\Attributes\RequiredPortAttribute.cs" />
-    <Compile Include="Scenes\Attributes\SceneKeyAttribute.cs" />
-    <Compile Include="Scenes\Attributes\StartupSceneAttribute.cs" />
-    <Compile Include="Scenes\BaseScene.cs" />
-    <Compile Include="Scenes\IBaseScene.cs" />
-    <Compile Include="Scenes\Implementations\TestScene.cs" />
-    <Compile Include="Scenes\SceneOrchestrator.cs" />
+    <Compile Include="Services\SceneOrchestrator.cs" />
     <Compile Include="Services\ClientControlService.cs" />
     <Compile Include="Services\PortControlService.cs" />
   </ItemGroup>
@@ -268,9 +258,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Contracts\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
@@ -284,6 +272,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BoneSpray.Net.Models\BoneSpray.Net.Models.csproj">
+      <Project>{300d927e-93be-43de-80c5-07135c59f186}</Project>
+      <Name>BoneSpray.Net.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BoneSpray.Net.Scenes\BoneSpray.Net.Scenes.csproj">
+      <Project>{C16D5D54-D8D5-4A62-BDF1-1445070F2FA2}</Project>
+      <Name>BoneSpray.Net.Scenes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BoneSpray.Net.Visuals\BoneSpray.Net.Visuals.csproj">
       <Project>{31E4EC60-B3D0-47DB-9D14-F709A092787F}</Project>
       <Name>BoneSpray.Net.Visuals</Name>

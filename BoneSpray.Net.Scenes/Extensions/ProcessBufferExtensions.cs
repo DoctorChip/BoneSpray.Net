@@ -2,7 +2,7 @@
 using JackSharp.Processing;
 using System.Collections.Generic;
 
-namespace BoneSpray.Net.Extensions
+namespace BoneSpray.Net.Scenes.Extensions
 {
     public static class ProcessBufferExtensions
     {

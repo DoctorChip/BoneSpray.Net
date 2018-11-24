@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BoneSpray.Net.Scenes.Attributes
+namespace BoneSpray.Net.Models.Attributes
 {
     /// <summary>
     /// Required to inform the system which key should set a scene to Active.

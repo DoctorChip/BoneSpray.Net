@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using BoneSpray.Net.Extensions;
+using BoneSpray.Net.Scenes.Extensions;
 using BoneSpray.Net.Models;
-using BoneSpray.Net.Scenes.Attributes;
+using BoneSpray.Net.Models.Attributes;
 using JackSharp.Ports;
 using JackSharp.Processing;
 
