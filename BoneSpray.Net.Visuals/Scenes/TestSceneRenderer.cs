@@ -1,7 +1,7 @@
 ﻿using BoneSpray.Net.Models;
 using BoneSpray.Net.Models.Attributes;
 using BoneSpray.Net.Scenes.Implementations;
-using BoneSpray.Net.Services;
+using BoneSpray.Net.Visuals.Models.Models.Attributes;
 using JackSharp.Ports;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,10 @@ using System.Linq;
 
 namespace BoneSpray.Net.Visuals.Scenes
 {
-    [SceneSource(nameof(TestScene))]
+    [SceneKey("TEST_SCENE")]
+    [StartupScene]
+    [SceneSource(typeof(TestScene))]
+    [BindPort(PortType.Midi, typeof(TestScene), "1", nameof(HandleCallback))]
     public class TestSceneRenderer : BaseRenderer
     {
         //private static void Draw()
@@ -33,16 +36,13 @@ namespace BoneSpray.Net.Visuals.Scenes
         //    _graphicsDevice.SwapBuffers();
         //}
 
-        private void HandleCallback(IEnumerable<SimpleMidiEvent> events)
+        public void HandleCallback(IEnumerable<SimpleMidiEvent> events)
         {
             throw new Exception($"{events.Count().ToString()} EVENTS REC'D.");
         }
 
         public override void CreateResources()
         {
-            var action = PortConnectionHelper.GetMidiPortContainer(typeof(TestScene), "1");
-            action.MidiStream += HandleCallback;
-
         //    ResourceFactory factory = _graphicsDevice.ResourceFactory;
 
         //    VertexPositionColor[] quadVertices =

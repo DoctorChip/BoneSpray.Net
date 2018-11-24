@@ -19,6 +19,11 @@ namespace BoneSpray.Net.Services
         private static Dictionary<string, IBaseScene> _scenes = new Dictionary<string, IBaseScene>();
 
         /// <summary>
+        /// The active scene. Initally this will be populated by a scene that has the StartupScene attribute.
+        /// </summary>
+        public static IBaseScene ActiveScene;
+
+        /// <summary>
         /// Use reflection to find all of our scenes and add them to this static class for easier access,
         /// and to keep them in memory. :)
         /// </summary>
@@ -44,6 +49,13 @@ namespace BoneSpray.Net.Services
                     if (keyAttr != null) {
                         key = keyAttr.Key;
                     }
+
+                    var startUpSceneAttr = (StartupSceneAttribute)attr.SingleOrDefault(x => (x as StartupSceneAttribute) != null);
+                    if (startUpSceneAttr != null)
+                    {
+                        if (ActiveScene != null) throw new Exception("Only one scene should have the StartUpScene attribute!");
+                        ActiveScene = instance;
+                    }
                 }
 
                 if (key == null) throw new Exception($"Unable to find a SceneKey attribute for type: {type.FullName}.");
@@ -51,7 +63,24 @@ namespace BoneSpray.Net.Services
                 _scenes.Add(key, instance);
             }
 
+            if (ActiveScene == null)
+            {
+                throw new Exception("No scene was found with the StartupScene attribute. Please register one!");
+            }
+
             return _scenes.Count();
+        }
+
+        /// <summary>
+        /// Assign the active scene.
+        /// </summary>
+        public static bool SetActiveSceneByType(Type sceneType)
+        {
+            var scene = _scenes.SingleOrDefault(x => x.Value.GetType() == sceneType).Value;
+            if (scene == null) return false;
+
+            ActiveScene = scene;
+            return true;
         }
 
         /// <summary>

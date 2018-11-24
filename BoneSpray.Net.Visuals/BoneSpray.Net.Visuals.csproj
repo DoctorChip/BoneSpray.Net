@@ -196,6 +196,10 @@
       <Project>{2EE24875-0F14-4FA9-9CDB-D86C501EEA1C}</Project>
       <Name>BoneSpray.Net.Services</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BoneSpray.Net.Visuals.Models\BoneSpray.Net.Visuals.Models.csproj">
+      <Project>{970DAF30-6530-4D17-A81B-C872B9DAE972}</Project>
+      <Name>BoneSpray.Net.Visuals.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shaders\Fragment.hlsl" />

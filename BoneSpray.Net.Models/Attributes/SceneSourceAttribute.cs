@@ -11,9 +11,16 @@ namespace BoneSpray.Net.Models.Attributes
     {
         public string Scene { get; }
 
+        public Type Type { get; }
+
         public SceneSourceAttribute(string Scene)
         {
             this.Scene = Scene;
+        }
+
+        public SceneSourceAttribute(Type Scene)
+        {
+            this.Type = Scene;
         }
     }
 }
