@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using BoneSpray.Net.Scenes.Extensions;
+﻿using BoneSpray.Net.Scenes.Extensions;
 using BoneSpray.Net.Models;
 using BoneSpray.Net.Models.Attributes;
 using JackSharp.Ports;
 using JackSharp.Processing;
+using System.Linq;
 
 namespace BoneSpray.Net.Scenes.Implementations
 {
@@ -20,10 +19,10 @@ namespace BoneSpray.Net.Scenes.Implementations
         /// </summary>
         public void ProcessMidiOneEvent(ProcessBuffer buffer)
         {
-            var notes = buffer.GetSimpleEvents();
+            var notes = buffer.GetSimpleEvents(out var name);
             if (notes.Count != 0)
             {
-                MidiBroadcastBuffer?.Invoke(notes);
+                ((OutMidiPortContainer)OutPorts.SingleOrDefault(x => x.Name == name && x.Type == PortType.Midi)).MidiStream?.Invoke(notes);
             }
         }
 
@@ -32,19 +31,9 @@ namespace BoneSpray.Net.Scenes.Implementations
         /// </summary>
         public void ProcessAudioOneEvent(ProcessBuffer buffer)
         {
-            if (buffer.AudioIn.Length == 0) return;
-            AudioBroadcastBuffer?.Invoke(buffer.AudioIn);
+            //if (buffer.AudioIn.Length == 0) return;
+            //var name = buffer.AudioIn[0].Port.Name;
+            //((OutAudioPortContainer)OutPorts.SingleOrDefault(x => x.Name == name)).AudioStream?.Invoke(buffer.AudioIn);
         }
-
-        /// <summary>
-        /// Our midi output buffer stream.
-        /// </summary>
-        public Action<IEnumerable<SimpleMidiEvent>> MidiBroadcastBuffer { get; set; }
-
-
-        /// <summary>
-        /// Our audio output buffer stream.
-        /// </summary>
-        public Action<AudioBuffer[]> AudioBroadcastBuffer { get; set; }
     }
 }

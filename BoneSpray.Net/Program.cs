@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Bonespray.Net;
+using Bonespray.Net.Services;
 using BoneSpray.Net.Scenes;
 using BoneSpray.Net.Services;
 using BoneSpray.Net.Visuals;

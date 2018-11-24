@@ -92,10 +92,37 @@ namespace BoneSpray.Net.Services
                     var portCallbackMethodInfo = scene.Value.GetType().GetMethod(port.Callback);
                     var portCallback = (Action<ProcessBuffer>)Delegate.CreateDelegate(typeof(Action<ProcessBuffer>), scene.Value, portCallbackMethodInfo);
                     existingPort.Value.PortProcessor.ProcessFunc += portCallback;
+
+                    if (type == PortType.Midi)
+                    {
+                        scene.Value.OutPorts.Add(new OutMidiPortContainer
+                        {
+                            Name = port.Key,
+                            Type = type,
+                            MidiStream = null,
+                        });
+                    }
+                    else
+                    {
+                        scene.Value.OutPorts.Add(new OutAudioPortContainer
+                        {
+                            Name = port.Key,
+                            Type = type,
+                            AudioStream = null,
+                        });
+                    }
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Get the Out Ports for a given scene, by key.
+        /// </summary>
+        public static IEnumerable<OutPortContainer> GetPortsByKey(string key)
+        {
+            return _scenes.SingleOrDefault(x => x.Key == key).Value.OutPorts;
         }
 
         /// <summary>

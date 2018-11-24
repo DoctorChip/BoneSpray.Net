@@ -51,7 +51,10 @@ namespace BoneSpray.Net.Services
         {
             if (type == PortType.Midi)
             {
-                var processor = new Processor(name, midiInPorts: 1, autoconnect: true);
+                var processor = new Processor(name, midiInPorts: 1, autoconnect: true)
+                {
+                    PortNameFormat = "1"
+                };
 
                 var container = new MidiPortContainer
                 {
@@ -65,7 +68,10 @@ namespace BoneSpray.Net.Services
             }
             else
             {
-                var processor = new Processor(name, audioInPorts: 1, autoconnect: true);
+                var processor = new Processor(name, audioInPorts: 1, autoconnect: true)
+                {
+                    PortNameFormat = "1",
+                };
 
                 var container = new AudioPortContainer
                 {

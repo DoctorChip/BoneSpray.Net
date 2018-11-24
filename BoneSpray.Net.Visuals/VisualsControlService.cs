@@ -38,10 +38,15 @@ namespace BoneSpray.Net.Visuals
 
            _graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, GraphicsBackend.OpenGL);
 
+            var test = new TestSceneRenderer();
+            test.CreateResources();
+
             while (window.Exists)
             {
                 window.PumpEvents();
             }
         }
+
     }
+
 }

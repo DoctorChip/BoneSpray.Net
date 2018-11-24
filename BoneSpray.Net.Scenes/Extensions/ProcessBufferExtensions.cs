@@ -11,14 +11,18 @@ namespace BoneSpray.Net.Scenes.Extensions
         /// list of MIDI events we can more easily work with.
         /// See: https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes
         /// </summary>
-        public static List<SimpleMidiEvent> GetSimpleEvents(this ProcessBuffer buffer)
+        public static List<SimpleMidiEvent> GetSimpleEvents(this ProcessBuffer buffer, out string name)
         {
+            name = null;
+
             // If we dont have any data in the buffer, just return an empty list
             var notes = new List<SimpleMidiEvent>();
             if (buffer.MidiIn.Length == 0) return notes;
 
             foreach (MidiEventCollection<MidiInEvent> midi in buffer.MidiIn)
             {
+                name = midi.Port.Name;
+
                 foreach (var val in midi)
                 {
                     var note = val.MidiData;

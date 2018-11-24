@@ -1,5 +1,11 @@
-﻿using BoneSpray.Net.Models.Attributes;
+﻿using BoneSpray.Net.Models;
+using BoneSpray.Net.Models.Attributes;
 using BoneSpray.Net.Scenes.Implementations;
+using BoneSpray.Net.Services;
+using JackSharp.Ports;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BoneSpray.Net.Visuals.Scenes
 {
@@ -27,8 +33,17 @@ namespace BoneSpray.Net.Visuals.Scenes
         //    _graphicsDevice.SwapBuffers();
         //}
 
+        private void HandleCallback(IEnumerable<SimpleMidiEvent> events)
+        {
+            /// FUCK YESSSSSS
+        }
+
         public override void CreateResources()
         {
+            var scenePorts = SceneOrchestrator.GetPortsByKey("TEST_SCENE");
+            var midiOne = (OutMidiPortContainer)scenePorts.SingleOrDefault(x => x.Name == "1" && x.Type == PortType.Midi);
+            midiOne.MidiStream += HandleCallback;
+
         //    ResourceFactory factory = _graphicsDevice.ResourceFactory;
 
         //    VertexPositionColor[] quadVertices =

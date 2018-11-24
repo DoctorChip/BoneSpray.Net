@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JackSharp, Version=0.4.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="Microsoft.DotNet.PlatformAbstractions, Version=2.0.3.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.DotNet.PlatformAbstractions.2.0.3\lib\net45\Microsoft.DotNet.PlatformAbstractions.dll</HintPath>
     </Reference>
@@ -189,6 +190,10 @@
     <ProjectReference Include="..\BoneSpray.Net.Scenes\BoneSpray.Net.Scenes.csproj">
       <Project>{c16d5d54-d8d5-4a62-bdf1-1445070f2fa2}</Project>
       <Name>BoneSpray.Net.Scenes</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BoneSpray.Net.Services\BoneSpray.Net.Services.csproj">
+      <Project>{2EE24875-0F14-4FA9-9CDB-D86C501EEA1C}</Project>
+      <Name>BoneSpray.Net.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

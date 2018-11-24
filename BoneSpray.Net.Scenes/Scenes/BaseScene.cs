@@ -1,4 +1,5 @@
 ﻿using JackSharp.Ports;
+using BoneSpray.Net.Models;
 using System.Collections.Generic;
 
 namespace BoneSpray.Net.Scenes
@@ -19,5 +20,11 @@ namespace BoneSpray.Net.Scenes
         /// The live Audio ports.
         /// </summary>
         public List<AudioInPort> AudioPorts { get; protected set; }
+
+
+        /// <summary>
+        /// A list of all port outputs, which client visual scenes can fetch and bind to, by name and type.
+        /// </summary>
+        public List<OutPortContainer> OutPorts { get; set; } = new List<OutPortContainer>();
     }
 }

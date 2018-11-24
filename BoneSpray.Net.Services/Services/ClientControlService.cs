@@ -2,7 +2,7 @@
 using JackSharp.Ports;
 using System;
 
-namespace Bonespray.Net
+namespace Bonespray.Net.Services
 {
     /// <summary>
     /// Controls the JACK connection
