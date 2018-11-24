@@ -1,5 +1,4 @@
 ﻿using System;
-using Bonespray.Net.Services;
 using BoneSpray.Net.Scenes;
 using BoneSpray.Net.Services;
 using BoneSpray.Net.Visuals;
@@ -17,7 +16,7 @@ namespace BoneSpray.Net
             // Launch our JACK Client
             LaunchJackClient();
 
-            // Process all of our scenes, connecting up their ports.
+            // Process all of our scenes, connecting up their ports and registering keybindings.
             FindAndRegisterScenes();
 
             // Fire up the JACK server, and start all of the defined ports from above.

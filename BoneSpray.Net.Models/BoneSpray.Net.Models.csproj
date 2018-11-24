@@ -49,6 +49,7 @@
     <Compile Include="Attributes\SceneKeyAttribute.cs" />
     <Compile Include="Attributes\SceneSourceAttribute.cs" />
     <Compile Include="Attributes\StartupSceneAttribute.cs" />
+    <Compile Include="EventArgs\OnSceneChangedEventArgs.cs" />
     <Compile Include="Models\OutPortContainer.cs" />
     <Compile Include="Models\PortContainer.cs" />
     <Compile Include="Models\SimpleMidiEvent.cs" />

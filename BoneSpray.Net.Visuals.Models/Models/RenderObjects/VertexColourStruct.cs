@@ -3,7 +3,7 @@ using Veldrid;
 
 namespace BoneSpray.Net.Visuals.Models.RenderObjects
 {
-    struct VertexPositionColor
+    public struct VertexPositionColor
     {
         public const uint SizeInBytes = 24;
 

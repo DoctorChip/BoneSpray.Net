@@ -1,6 +1,8 @@
 ﻿using BoneSpray.Net.Models;
 using BoneSpray.Net.Models.Attributes;
+using BoneSpray.Net.Models.Events;
 using BoneSpray.Net.Scenes;
+using BoneSpray.Net.Services.Services;
 using JackSharp.Ports;
 using JackSharp.Processing;
 using System;
@@ -50,6 +52,11 @@ namespace BoneSpray.Net.Services
                         key = keyAttr.Key;
                     }
 
+                    var keybindAttr = (KeybindAttribute)attr.SingleOrDefault(x => (x as KeybindAttribute) != null);
+                    if (keybindAttr != null) {
+                        KeybindOrchestrator.AddKeybindingMap(keybindAttr.Keybind, type);
+                    }
+
                     var startUpSceneAttr = (StartupSceneAttribute)attr.SingleOrDefault(x => (x as StartupSceneAttribute) != null);
                     if (startUpSceneAttr != null)
                     {
@@ -79,8 +86,19 @@ namespace BoneSpray.Net.Services
             var scene = _scenes.SingleOrDefault(x => x.Value.GetType() == sceneType).Value;
             if (scene == null) return false;
 
+            OnSceneChanged(new OnSceneChangedEventArgs { ActiveScene = scene.GetType() });
+
             ActiveScene = scene;
             return true;
+        }
+
+        /// <summary>
+        /// Our SceneChanged event.
+        /// </summary>
+        public static event EventHandler<OnSceneChangedEventArgs> SceneChanged;
+        public static void OnSceneChanged(OnSceneChangedEventArgs e)
+        {
+            SceneChanged?.Invoke(typeof(SceneOrchestrator), e);
         }
 
         /// <summary>

@@ -1,5 +1,8 @@
 ﻿using BoneSpray.Net.Models;
 using BoneSpray.Net.Models.Attributes;
+using BoneSpray.Net.Models.Events;
+using BoneSpray.Net.Scenes;
+using BoneSpray.Net.Services;
 using BoneSpray.Net.Visuals.Models.Models.Attributes;
 using BoneSpray.Net.Visuals.Scenes;
 using JackSharp.Ports;
@@ -22,17 +25,16 @@ namespace BoneSpray.Net.Visuals
         private static Dictionary<string, BaseRenderer> Renderers { get; set; } = new Dictionary<string, BaseRenderer>();
 
         /// <summary>
+        /// A map between the BoneSpray Scene objects and their renderers.
+        /// </summary>
+        public static Dictionary<Type, Type> SceneToRendererMap { get; set; } = new Dictionary<Type, Type>();
+
+        /// <summary>
         /// The active renderer
         /// </summary>
-        private static string ActiveRendererKey { get; set; } = null;
+        private static BaseRenderer ActiveRenderer { get; set; }
 
-        private static GraphicsDevice _graphicsDevice;
-        private static CommandList _commandList;
-        private static DeviceBuffer _vertexBuffer;
-        private static DeviceBuffer _indexBuffer;
-        private static Shader _vertexShader;
-        private static Shader _fragmentShader;
-        private static Pipeline _pipeline;
+        public static GraphicsDevice GraphicsDevice;
 
         /// <summary>
         /// The main entry point for our visual app.
@@ -50,20 +52,25 @@ namespace BoneSpray.Net.Visuals
             // Bind all the ports required for our Visual Scenes
             BindAllPortsFromAttributes();
 
+            // Listen to any events from BoneSpray, such as Scene Changed
+            BindToEvents();
+
             // Enter our render loop
             while (window.Exists)
             {
                 window.PumpEvents();
+                ActiveRenderer.Draw();
             }
         }
 
         /// <summary>
-        /// Get the active renderer.
+        /// Sets the active renderer.
         /// </summary>
-        /// <returns></returns>
-        public static BaseRenderer GetActiveRenderer()
+        public static void SetActiveScene(string sceneKey)
         {
-            return Renderers.SingleOrDefault(x => x.Key == ActiveRendererKey).Value;
+            var sceneFound = Renderers.TryGetValue(sceneKey, out var scene);
+            if (!sceneFound) throw new Exception("Renderer not found. Is the KEY correct?");
+            ActiveRenderer = scene;
         }
 
         /// <summary>
@@ -81,7 +88,7 @@ namespace BoneSpray.Net.Visuals
             };
 
             Sdl2Window window = VeldridStartup.CreateWindow(ref windowCI);
-           _graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, GraphicsBackend.OpenGL);
+            GraphicsDevice = VeldridStartup.CreateGraphicsDevice(window);
 
             return window;
         }
@@ -112,24 +119,55 @@ namespace BoneSpray.Net.Visuals
                         key = keyAttr.Key;
                     }
 
+                    var sourceAttr = (SceneSourceAttribute)attr.SingleOrDefault(x => (x as SceneSourceAttribute) != null);
+                    if (sourceAttr != null)
+                    {
+                        SceneToRendererMap.Add(sourceAttr.Type, instance.GetType());
+                    }
+
                     var startUpSceneAttr = (StartupSceneAttribute)attr.SingleOrDefault(x => (x as StartupSceneAttribute) != null);
                     if (startUpSceneAttr != null)
                     {
-                        if (ActiveRendererKey != null) throw new Exception("Only one scene should have the StartUpScene attribute!");
-                        ActiveRendererKey = key;
+                        if (ActiveRenderer != null) throw new Exception("Only one scene should have the StartUpScene attribute!");
+                        ActiveRenderer = instance;
                     }
                 }
 
                 if (key == null) throw new Exception($"Unable to find a SceneKey attribute for type: {type.FullName}.");
 
+                // Create each renderer's resources
+                instance.CreateResources();
+
                 Renderers.Add(key, instance);
             }
 
-            if (ActiveRendererKey == null)
+            if (ActiveRenderer == null)
             {
                 throw new Exception("No scene was found with the StartupScene attribute. Please register one!");
             }
         }
+
+        /// <summary>
+        /// Bind to any events across BoneSpray, such as the SceneChanged event from our MIDI.
+        /// </summary>
+        private static void BindToEvents()
+        {
+            SceneOrchestrator.SceneChanged += OnSceneChangedEventHandler;
+        }
+
+        /// <summary>
+        /// Handle SceneChangeEvents, mapping the passed Scene type into a Render type.
+        /// </summary>
+        public static void OnSceneChangedEventHandler(object sender, OnSceneChangedEventArgs e)
+        {
+            var rendererFound = SceneToRendererMap.TryGetValue(e.ActiveScene, out var rendererType);
+            if (!rendererFound) return;
+
+            var renderer = Renderers.SingleOrDefault(x => x.Value.GetType() == rendererType);
+
+            SetActiveScene(renderer.Key);
+        }
+
 
         /// <summary>
         /// Bind all our required ports in the visual scenes to the callback methods specified in the BindPort attributes.
@@ -171,6 +209,14 @@ namespace BoneSpray.Net.Visuals
 
                 yield return castedAttr;
             }
+        }
+
+        /// <summary>
+        /// Dispose all of the render resources.
+        /// </summary>
+        public static void DisposeResources()
+        {
+            GraphicsDevice.Dispose();
         }
     }
 }
