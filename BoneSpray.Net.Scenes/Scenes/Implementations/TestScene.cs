@@ -10,8 +10,8 @@ namespace BoneSpray.Net.Scenes.Implementations
     [Keybind('1')]
     [StartupScene]
     [SceneKey("TEST_SCENE")]
-    [RequiredPort(Type: PortType.Midi, PortName: "1", CallbackName: nameof(ProcessMidiOneEvent))]
-    [RequiredPort(Type: PortType.Audio, PortName: "1", CallbackName: nameof(ProcessAudioOneEvent))]
+    [RequiredPort(Type: PortType.Midi, PortName: "TestSceneMidi", CallbackName: nameof(ProcessMidiOneEvent))]
+    [RequiredPort(Type: PortType.Audio, PortName: "TestSceneAudio", CallbackName: nameof(ProcessAudioOneEvent))]
     public class TestScene : BaseScene
     {
         /// <summary>

@@ -15,7 +15,7 @@ namespace BoneSpray.Net.Visuals.Scenes
     [SceneKey("TEST_SCENE")]
     [StartupScene]
     [SceneSource(typeof(TestScene))]
-    [BindPort(PortType.Midi, typeof(TestScene), "1", nameof(HandleCallback))]
+    [BindPort(PortType.Midi, typeof(TestScene), "TestSceneMidi", nameof(HandleCallback))]
     public class TestSceneRenderer : BaseRenderer
     {
         public override void Draw()
