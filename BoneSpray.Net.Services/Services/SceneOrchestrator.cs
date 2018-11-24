@@ -118,11 +118,11 @@ namespace BoneSpray.Net.Services
         }
 
         /// <summary>
-        /// Get the Out Ports for a given scene, by key.
+        /// Get the Out Ports for a given scene, by type.
         /// </summary>
-        public static IEnumerable<OutPortContainer> GetPortsByKey(string key)
+        public static IEnumerable<OutPortContainer> GetPortsBySceneType(Type sceneType)
         {
-            return _scenes.SingleOrDefault(x => x.Key == key).Value.OutPorts;
+            return _scenes.SingleOrDefault(x => x.Value.GetType() == sceneType).Value.OutPorts;
         }
 
         /// <summary>

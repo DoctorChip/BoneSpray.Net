@@ -35,14 +35,13 @@ namespace BoneSpray.Net.Visuals.Scenes
 
         private void HandleCallback(IEnumerable<SimpleMidiEvent> events)
         {
-            /// FUCK YESSSSSS
+            throw new Exception($"{events.Count().ToString()} EVENTS REC'D.");
         }
 
         public override void CreateResources()
         {
-            var scenePorts = SceneOrchestrator.GetPortsByKey("TEST_SCENE");
-            var midiOne = (OutMidiPortContainer)scenePorts.SingleOrDefault(x => x.Name == "1" && x.Type == PortType.Midi);
-            midiOne.MidiStream += HandleCallback;
+            var action = PortConnectionHelper.GetMidiPortContainer(typeof(TestScene), "1");
+            action.MidiStream += HandleCallback;
 
         //    ResourceFactory factory = _graphicsDevice.ResourceFactory;
 
