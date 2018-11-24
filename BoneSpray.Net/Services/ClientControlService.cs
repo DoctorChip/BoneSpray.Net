@@ -1,41 +1,57 @@
 ﻿using JackSharp;
 using JackSharp.Ports;
+using System;
 
 namespace Bonespray.Net
 {
     /// <summary>
     /// Controls the JACK connection
     /// </summary>
-    public class ClientControlService 
+    public static class ClientControlService 
     {
         private static Controller controller;
 
-        public ClientControlService(string controllerName)
-        {
-            if (controller == null)
-            {
-                controller = new Controller(controllerName);
-            }
-        }
+        /// <summary>
+        /// The name of the JACK client we are going to create;
+        /// </summary>
+        public static string ClientName = null;
         
         /// <summary>
         /// If the controller is connected to the JACK server.
         /// </summary>
-        public bool IsConnected => controller.IsConnectedToJack;
+        public static bool IsConnected => controller.IsConnectedToJack;
 
         /// <summary>
         /// Gets the sample rate set for the JACK server.
         /// </summary>
-        public int SampleRate => controller.SampleRate;
+        public static int SampleRate => controller.SampleRate;
+
+        /// <summary>
+        /// Set our ClientName, prior to initalising the client
+        /// </summary>
+        public static void SetName(string name) => ClientName = name;
 
         /// <summary>
         /// Starts the JACK connection, and optionally the Server.
         /// </summary>
         /// <param name="startJack">Wether to start the JACK server. Default: false.</param>
         /// <returns>Success</returns>
-        public bool Start(bool startJack = false)
+        public static bool Start(bool startJack = false)
         {
             return controller.Start(startJack);
+        }
+
+        /// <summary>
+        /// Check all of our configuration is correct, and if so, create our Client.
+        /// </summary>
+        public static void Create()
+        {
+            if (controller != null) return;
+
+            if (ClientName == null) throw new Exception(
+                "Client Name not set prior to creating Controller. Set ClientName first.");
+
+            controller = new Controller(ClientName);
         }
 
         /// <summary>
@@ -43,7 +59,7 @@ namespace Bonespray.Net
         /// </summary>
         /// <param name="inPort">The in port to connect.</param>
         /// <param name="outPort">The out port to connect.</param>
-        public bool Connect(PortReference inPort, PortReference outPort)
+        public static bool Connect(PortReference inPort, PortReference outPort)
         {
             return controller.Connect(inPort, outPort);
         }
@@ -51,7 +67,7 @@ namespace Bonespray.Net
         /// <summary>
         /// Disconnect two ports.
         /// </summary>
-        public bool Disconnect(PortReference inPort, PortReference outPort)
+        public static bool Disconnect(PortReference inPort, PortReference outPort)
         {
             return controller.Disconnect(outPort, inPort);
         }
@@ -60,7 +76,7 @@ namespace Bonespray.Net
         /// Stops the JACK connection.
         /// </summary>
         /// <returns>Success</returns>
-        public bool Stop()
+        public static bool Stop()
         {
             return controller.Stop();
         }

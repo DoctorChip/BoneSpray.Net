@@ -1,6 +1,9 @@
 ﻿namespace BoneSpray.Net.Visuals.Scenes
 {
-    public class BaseRenderer
+    public abstract class BaseRenderer
     {
+        public abstract void DisposeResources();
+
+        public abstract void CreateResources();
     }
 }
