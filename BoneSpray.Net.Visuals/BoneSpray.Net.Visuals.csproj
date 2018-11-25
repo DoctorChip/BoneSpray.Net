@@ -180,6 +180,7 @@
     <Compile Include="PortConnectionHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenes\BaseRenderer.cs" />
+    <Compile Include="Scenes\TestScene2Renderer.cs" />
     <Compile Include="Scenes\TestSceneRenderer.cs" />
     <Compile Include="ShaderService.cs" />
     <Compile Include="VisualsControlService.cs" />

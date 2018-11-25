@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace BoneSpray.Net.Scenes.Implementations
 {
-    [Keybind('1')]
+    [Keybind(1)]
     [StartupScene]
     [SceneKey("TEST_SCENE")]
     [RequiredPort(Type: PortType.Midi, PortName: "TestSceneMidi", CallbackName: nameof(ProcessMidiOneEvent))]

@@ -8,9 +8,9 @@ namespace BoneSpray.Net.Models.Attributes
     [AttributeUsage(AttributeTargets.Class)]
     public class KeybindAttribute : Attribute
     {
-        public char Keybind { get; set; }
+        public int Keybind { get; set; }
 
-        public KeybindAttribute(char keybind)
+        public KeybindAttribute(int keybind)
         {
             Keybind = keybind;
         }

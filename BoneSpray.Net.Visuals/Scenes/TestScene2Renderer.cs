@@ -12,11 +12,10 @@ using Veldrid;
 
 namespace BoneSpray.Net.Visuals.Scenes
 {
-    [SceneKey("TEST_SCENE")]
-    [StartupScene]
-    [SceneSource(typeof(TestScene))]
-    [BindPort(PortType.Midi, typeof(TestScene), "TestSceneMidi", nameof(HandleCallback))]
-    public class TestSceneRenderer : BaseRenderer
+    [SceneKey("TEST_SCENE2")]
+    [SceneSource(typeof(TestScene2))]
+    [BindPort(PortType.Midi, typeof(TestScene2), "TestScene2Midi", nameof(HandleCallback))]
+    public class TestScene2Renderer : BaseRenderer
     {
         public override void Draw()
         {
@@ -50,10 +49,10 @@ namespace BoneSpray.Net.Visuals.Scenes
 
             VertexPositionColor[] quadVertices =
             {
-                new VertexPositionColor(new Vector2(-.75f, .75f), RgbaFloat.Green),
-                new VertexPositionColor(new Vector2(.75f, .75f), RgbaFloat.Green),
-                new VertexPositionColor(new Vector2(-.75f, -.75f), RgbaFloat.Green),
-                new VertexPositionColor(new Vector2(.75f, -.75f), RgbaFloat.Green)
+                new VertexPositionColor(new Vector2(-.75f, .75f), RgbaFloat.Red),
+                new VertexPositionColor(new Vector2(.75f, .75f), RgbaFloat.Red),
+                new VertexPositionColor(new Vector2(-.75f, -.75f), RgbaFloat.Red),
+                new VertexPositionColor(new Vector2(.75f, -.75f), RgbaFloat.Red)
             };
 
             ushort[] quadIndices = { 0, 1, 2, 3 };
