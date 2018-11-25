@@ -1,18 +1,83 @@
-﻿using Veldrid;
+﻿using BoneSpray.Net.Visuals.Models.Models.RenderUtilities;
+using System.IO;
+using Veldrid;
 
 namespace BoneSpray.Net.Visuals.Scenes
 {
+    /// <summary>
+    /// Provides a base for each Renderer, setting up things such as the scene
+    /// camera and acting as a contract for implementations.
+    /// </summary>
     public abstract class BaseRenderer
     {
-        protected CommandList _commandList;
-        protected DeviceBuffer _vertexBuffer;
-        protected DeviceBuffer _indexBuffer;
-        protected Shader _vertexShader;
-        protected Shader _fragmentShader;
-        protected Pipeline _pipeline;
+        /// <summary>
+        /// Our main camera for the scene.
+        /// </summary>
+        protected Camera Camera;
 
+        /// <summary>
+        /// Is the Renderer ready? Set once all resources are ready.
+        /// </summary>
+        protected bool Initialised = false;
+
+        /// <summary>
+        /// The scene's CommandList object, for recording graphics commands.
+        /// </summary>
+        protected CommandList CommandList { get; set; }
+
+        /// <summary>
+        /// The renderers main swapchain.
+        /// </summary>
+        protected Swapchain MainSwapchain { get; set; }
+
+        /// <summary>
+        /// Construct the required objects for the scene, such as a Camera.
+        /// </summary>
+        public BaseRenderer()
+        {
+            Camera = new Camera(
+                VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX,
+                VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY);
+        }
+
+        /// <summary>
+        /// Get a shader resource extension based on the current backend type.
+        /// </summary>
+        protected string GetExtension(GraphicsBackend backendType)
+        {
+            return backendType == GraphicsBackend.Direct3D11 ? "hlsl.bytes"
+                : backendType == GraphicsBackend.Vulkan ? "spv"
+                    : backendType == GraphicsBackend.Metal ?  "metallib" 
+                        : backendType == GraphicsBackend.OpenGL ? "430.glsl"
+                            : "300.glsles";
+        }
+
+        /// <summary>
+        /// Read an embedded asset, by filename, returns a byte[]
+        /// </summary>
+        protected byte[] ReadEmbeddedAssetBytes(string name)
+        {
+            using (Stream stream = GetType().Assembly.GetManifestResourceStream(name))
+            {
+                byte[] bytes = new byte[stream.Length];
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    stream.CopyTo(ms);
+                    return bytes;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Required for every scene. This scene will process the DeviceBuffers and pump them into the
+        /// GraphicsDevice attached to the VisualsControlService, which renders to our window.
+        /// </summary>
         public abstract void Draw();
 
+        /// <summary>
+        /// Build any resources such as vertex buffers, pipelines, etc. required for initialising our
+        /// scene.
+        /// </summary>
         public abstract void CreateResources();
 
         /// <summary>
@@ -20,12 +85,8 @@ namespace BoneSpray.Net.Visuals.Scenes
         /// </summary>
         public void DisposeResources()
         {
-            _commandList.Dispose();
-            _fragmentShader.Dispose();
-            _indexBuffer.Dispose();
-            _pipeline.Dispose();
-            _vertexBuffer.Dispose();
-            _vertexShader.Dispose();
+            CommandList.Dispose();
+            MainSwapchain.Dispose();
         }
     }
 }

@@ -17,24 +17,31 @@ namespace BoneSpray.Net.Visuals.Scenes
     [BindPort(PortType.Midi, typeof(TestScene2), "TestScene2Midi", nameof(HandleCallback))]
     public class TestScene2Renderer : BaseRenderer
     {
+        private DeviceBuffer VertexBuffer;
+        private DeviceBuffer IndexBuffer;
+        private Pipeline Pipeline;
+
+        private Shader VertexShader;
+        private Shader FragmentShader;
+
         public override void Draw()
         {
-            _commandList.Begin();
-            _commandList.SetFramebuffer(VisualsControlService.GraphicsDevice.SwapchainFramebuffer);
-            _commandList.ClearColorTarget(0, RgbaFloat.Black);
+            CommandList.Begin();
+            CommandList.SetFramebuffer(VisualsControlService.GraphicsDevice.SwapchainFramebuffer);
+            CommandList.ClearColorTarget(0, RgbaFloat.Black);
 
-            _commandList.SetVertexBuffer(0, _vertexBuffer);
-            _commandList.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
-            _commandList.SetPipeline(_pipeline);
-            _commandList.DrawIndexed(
+            CommandList.SetVertexBuffer(0, VertexBuffer);
+            CommandList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt16);
+            CommandList.SetPipeline(Pipeline);
+            CommandList.DrawIndexed(
                 indexCount: 4,
                 instanceCount: 1,
                 indexStart: 0,
                 vertexOffset: 0,
                 instanceStart: 0);
 
-            _commandList.End();
-            VisualsControlService.GraphicsDevice.SubmitCommands(_commandList);
+            CommandList.End();
+            VisualsControlService.GraphicsDevice.SubmitCommands(CommandList);
             VisualsControlService.GraphicsDevice.SwapBuffers();
         }
 
@@ -57,18 +64,18 @@ namespace BoneSpray.Net.Visuals.Scenes
 
             ushort[] quadIndices = { 0, 1, 2, 3 };
 
-            _vertexBuffer = factory.CreateBuffer(new BufferDescription(4 * VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer));
-            _indexBuffer = factory.CreateBuffer(new BufferDescription(4 * sizeof(ushort), BufferUsage.IndexBuffer));
+            VertexBuffer = factory.CreateBuffer(new BufferDescription(4 * VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer));
+            IndexBuffer = factory.CreateBuffer(new BufferDescription(4 * sizeof(ushort), BufferUsage.IndexBuffer));
 
-            VisualsControlService.GraphicsDevice.UpdateBuffer(_vertexBuffer, 0, quadVertices);
-            VisualsControlService.GraphicsDevice.UpdateBuffer(_indexBuffer, 0, quadIndices);
+            VisualsControlService.GraphicsDevice.UpdateBuffer(VertexBuffer, 0, quadVertices);
+            VisualsControlService.GraphicsDevice.UpdateBuffer(IndexBuffer, 0, quadIndices);
 
             VertexLayoutDescription vertexLayout = new VertexLayoutDescription(
                 new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float2),
                 new VertexElementDescription("Color", VertexElementSemantic.Color, VertexElementFormat.Float4));
 
-            _vertexShader = ShaderService.LoadShader(ShaderStages.Vertex);
-            _fragmentShader = ShaderService.LoadShader(ShaderStages.Fragment);
+            VertexShader = ShaderService.LoadShader(ShaderStages.Vertex);
+            FragmentShader = ShaderService.LoadShader(ShaderStages.Fragment);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription
             {
@@ -87,15 +94,15 @@ namespace BoneSpray.Net.Visuals.Scenes
                 scissorTestEnabled: false);
 
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
-            pipelineDescription.ResourceLayouts = System.Array.Empty<ResourceLayout>();
+            pipelineDescription.ResourceLayouts = Array.Empty<ResourceLayout>();
             pipelineDescription.ShaderSet = new ShaderSetDescription(
                 vertexLayouts: new VertexLayoutDescription[] { vertexLayout },
-                shaders: new Shader[] { _vertexShader, _fragmentShader });
+                shaders: new Shader[] { VertexShader, FragmentShader });
 
             pipelineDescription.Outputs = VisualsControlService.GraphicsDevice.SwapchainFramebuffer.OutputDescription;
 
-            _pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
-            _commandList = factory.CreateCommandList();
+            Pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
+            CommandList = factory.CreateCommandList();
         }
     }
 }

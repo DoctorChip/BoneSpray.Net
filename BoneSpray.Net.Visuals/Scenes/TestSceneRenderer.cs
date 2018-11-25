@@ -2,12 +2,14 @@
 using BoneSpray.Net.Models.Attributes;
 using BoneSpray.Net.Scenes.Implementations;
 using BoneSpray.Net.Visuals.Models.Models.Attributes;
+using BoneSpray.Net.Visuals.Models.Models.RenderObjects;
 using BoneSpray.Net.Visuals.Models.RenderObjects;
 using JackSharp.Ports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Veldrid;
 
 namespace BoneSpray.Net.Visuals.Scenes
@@ -18,85 +20,136 @@ namespace BoneSpray.Net.Visuals.Scenes
     [BindPort(PortType.Midi, typeof(TestScene), "TestSceneMidi", nameof(HandleCallback))]
     public class TestSceneRenderer : BaseRenderer
     {
+        /// <summary>
+        /// The number of particles to render.
+        /// </summary>
+        private const int ParticleCount = 1024;
+
+        private DeviceBuffer ParticleBuffer;
+
+        private Pipeline ComputePipeline;
+        private Shader ComputeShader;
+        private Shader VertexShader;
+        private Shader FragmentShader;
+        private ResourceSet ComputeResourceSet;
+
+        private Pipeline GraphicsPipeline;
+        private ResourceSet GraphicsResourceSet;
+
         public override void Draw()
         {
-            _commandList.Begin();
-            _commandList.SetFramebuffer(VisualsControlService.GraphicsDevice.SwapchainFramebuffer);
-            _commandList.ClearColorTarget(0, RgbaFloat.Black);
+            if (!Initialised) { return; }
 
-            _commandList.SetVertexBuffer(0, _vertexBuffer);
-            _commandList.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
-            _commandList.SetPipeline(_pipeline);
-            _commandList.DrawIndexed(
-                indexCount: 4,
-                instanceCount: 1,
-                indexStart: 0,
-                vertexOffset: 0,
-                instanceStart: 0);
+            CommandList.Begin();
+            CommandList.SetPipeline(ComputePipeline);
+            CommandList.SetComputeResourceSet(0, ComputeResourceSet);
+            CommandList.Dispatch(1024, 1, 1);
+            CommandList.SetFramebuffer(MainSwapchain.Framebuffer);
+            CommandList.SetFullViewports();
+            CommandList.SetFullScissorRects();
+            CommandList.ClearColorTarget(0, RgbaFloat.Black);
+            CommandList.SetPipeline(GraphicsPipeline);
+            CommandList.SetGraphicsResourceSet(0, GraphicsResourceSet);
+            CommandList.Draw(ParticleCount, 1, 0, 0);
+            CommandList.End();
 
-            _commandList.End();
-            VisualsControlService.GraphicsDevice.SubmitCommands(_commandList);
-            VisualsControlService.GraphicsDevice.SwapBuffers();
+            VisualsControlService.GraphicsDevice.SubmitCommands(CommandList);
+            VisualsControlService.GraphicsDevice.SwapBuffers(MainSwapchain);
         }
 
         public void HandleCallback(IEnumerable<SimpleMidiEvent> events)
         {
-            throw new Exception($"{events.Count().ToString()} EVENTS REC'D.");
         }
 
         public override void CreateResources()
         {
-            var factory = VisualsControlService.GraphicsDevice.ResourceFactory;
+            ParticleBuffer = VisualsControlService.ResourceFactory.CreateBuffer(
+                new BufferDescription(
+                    (uint)Unsafe.SizeOf<ParticleStruct>() * ParticleCount,
+                    BufferUsage.StructuredBufferReadWrite,
+                    (uint)Unsafe.SizeOf<ParticleStruct>()));
 
-            VertexPositionColor[] quadVertices =
-            {
-                new VertexPositionColor(new Vector2(-.75f, .75f), RgbaFloat.Green),
-                new VertexPositionColor(new Vector2(.75f, .75f), RgbaFloat.Green),
-                new VertexPositionColor(new Vector2(-.75f, -.75f), RgbaFloat.Green),
-                new VertexPositionColor(new Vector2(.75f, -.75f), RgbaFloat.Green)
-            };
+            ComputeShader = VisualsControlService.ResourceFactory.CreateShader(new ShaderDescription(
+                ShaderStages.Compute,
+                ReadEmbeddedAssetBytes($"ParticlesCompute.{GetExtension(VisualsControlService.GraphicsDevice.BackendType)}"),
+                "CS"));
 
-            ushort[] quadIndices = { 0, 1, 2, 3 };
+            ResourceLayout particleStorageLayout = VisualsControlService.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("ParticlesBuffer", ResourceKind.StructuredBufferReadWrite, ShaderStages.Compute)));
 
-            _vertexBuffer = factory.CreateBuffer(new BufferDescription(4 * VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer));
-            _indexBuffer = factory.CreateBuffer(new BufferDescription(4 * sizeof(ushort), BufferUsage.IndexBuffer));
+            ComputePipelineDescription computePipelineDesc = new ComputePipelineDescription(
+                ComputeShader,
+                new[] { particleStorageLayout },
+                1, 1, 1);
 
-            VisualsControlService.GraphicsDevice.UpdateBuffer(_vertexBuffer, 0, quadVertices);
-            VisualsControlService.GraphicsDevice.UpdateBuffer(_indexBuffer, 0, quadIndices);
+            ComputePipeline = VisualsControlService.ResourceFactory.CreateComputePipeline(ref computePipelineDesc);
 
-            VertexLayoutDescription vertexLayout = new VertexLayoutDescription(
-                new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float2),
-                new VertexElementDescription("Color", VertexElementSemantic.Color, VertexElementFormat.Float4));
+            ComputeResourceSet = VisualsControlService.ResourceFactory.CreateResourceSet(new ResourceSetDescription(particleStorageLayout, ParticleBuffer));
 
-            _vertexShader = ShaderService.LoadShader(ShaderStages.Vertex);
-            _fragmentShader = ShaderService.LoadShader(ShaderStages.Fragment);
+            VertexShader = VisualsControlService.ResourceFactory.CreateShader(new ShaderDescription(
+                ShaderStages.Vertex,
+                ReadEmbeddedAssetBytes($"ParticlesVertex.{GetExtension(VisualsControlService.ResourceFactory.BackendType)}"),
+                "VS"));
+            FragmentShader = VisualsControlService.ResourceFactory.CreateShader(new ShaderDescription(
+                ShaderStages.Fragment,
+                ReadEmbeddedAssetBytes($"ParticlesFragment.{GetExtension(VisualsControlService.ResourceFactory.BackendType)}"),
+                "FS"));
 
-            GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription
-            {
-                BlendState = BlendStateDescription.SingleOverrideBlend,
-                DepthStencilState = new DepthStencilStateDescription(
-                depthTestEnabled: true,
-                depthWriteEnabled: true,
-                comparisonKind: ComparisonKind.LessEqual)
-            };
+            ShaderSetDescription shaderSet = new ShaderSetDescription(
+                Array.Empty<VertexLayoutDescription>(),
+                new[]
+                {
+                    VertexShader,
+                    FragmentShader
+                });
 
-            pipelineDescription.RasterizerState = new RasterizerStateDescription(
-                cullMode: FaceCullMode.Back,
-                fillMode: PolygonFillMode.Wireframe,
-                frontFace: FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: false);
+            particleStorageLayout = VisualsControlService.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("ParticlesBuffer", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex)));
 
-            pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
-            pipelineDescription.ResourceLayouts = Array.Empty<ResourceLayout>();
-            pipelineDescription.ShaderSet = new ShaderSetDescription(
-                vertexLayouts: new VertexLayoutDescription[] { vertexLayout },
-                shaders: new Shader[] { _vertexShader, _fragmentShader });
+            GraphicsPipelineDescription particleDrawPipelineDesc = new GraphicsPipelineDescription(
+                BlendStateDescription.SingleOverrideBlend,
+                DepthStencilStateDescription.Disabled,
+                RasterizerStateDescription.Default,
+                PrimitiveTopology.PointList,
+                shaderSet,
+                new[] { particleStorageLayout },
+                MainSwapchain.Framebuffer.OutputDescription);
 
-            pipelineDescription.Outputs = VisualsControlService.GraphicsDevice.SwapchainFramebuffer.OutputDescription;
+            GraphicsPipeline = VisualsControlService.ResourceFactory.CreateGraphicsPipeline(ref particleDrawPipelineDesc);
 
-            _pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
-            _commandList = factory.CreateCommandList();
+            GraphicsResourceSet = VisualsControlService.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+                particleStorageLayout,
+                ParticleBuffer));
+
+            CommandList = VisualsControlService.ResourceFactory.CreateCommandList();
+
+            InitResources();
+
+            Initialised = true;
         }
+
+        private void InitResources()
+        {
+            CommandList.Begin();
+
+            ParticleStruct[] initialParticles = new ParticleStruct[ParticleCount];
+            Random r = new Random();
+
+            for (int i = 0; i < ParticleCount; i++)
+            {
+                ParticleStruct pi = new ParticleStruct(
+                    new Vector2((float)(r.NextDouble() * (VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX)), 
+                                (float)(r.NextDouble() * (VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY))),
+                    new Vector2((float)(r.NextDouble() * 3), (float)(r.NextDouble() * 3)),
+                    new Vector4(0.4f + (float)r.NextDouble() * .6f, 0.4f + (float)r.NextDouble() * .6f, 0.4f + (float)r.NextDouble() * .6f, 1));
+                initialParticles[i] = pi;
+            }
+
+            CommandList.UpdateBuffer(ParticleBuffer, 0, initialParticles);
+            CommandList.End();
+
+            VisualsControlService.GraphicsDevice.SubmitCommands(CommandList);
+            VisualsControlService.GraphicsDevice.WaitForIdle();
+}
     }
 }

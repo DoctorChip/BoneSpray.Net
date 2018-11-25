@@ -257,6 +257,9 @@
     <Content Include="Shaders\Vertex.spv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Shaders\Particles\ParticlesCompute.hlsl.bytes" />
+    <None Include="Shaders\Particles\ParticlesFragment.hlsl.bytes" />
+    <None Include="Shaders\Particles\ParticlesVertex.hlsl.bytes" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
