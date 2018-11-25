@@ -46,7 +46,7 @@ namespace BoneSpray.Net.Visuals.Scenes
 
         public override void CreateResources()
         {
-            ResourceFactory factory = VisualsControlService.GraphicsDevice.ResourceFactory;
+            var factory = VisualsControlService.GraphicsDevice.ResourceFactory;
 
             VertexPositionColor[] quadVertices =
             {
@@ -82,13 +82,13 @@ namespace BoneSpray.Net.Visuals.Scenes
 
             pipelineDescription.RasterizerState = new RasterizerStateDescription(
                 cullMode: FaceCullMode.Back,
-                fillMode: PolygonFillMode.Solid,
+                fillMode: PolygonFillMode.Wireframe,
                 frontFace: FrontFace.Clockwise,
                 depthClipEnabled: true,
                 scissorTestEnabled: false);
 
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
-            pipelineDescription.ResourceLayouts = System.Array.Empty<ResourceLayout>();
+            pipelineDescription.ResourceLayouts = Array.Empty<ResourceLayout>();
             pipelineDescription.ShaderSet = new ShaderSetDescription(
                 vertexLayouts: new VertexLayoutDescription[] { vertexLayout },
                 shaders: new Shader[] { _vertexShader, _fragmentShader });

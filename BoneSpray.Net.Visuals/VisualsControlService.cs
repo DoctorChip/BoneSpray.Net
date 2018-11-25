@@ -1,7 +1,6 @@
 ﻿using BoneSpray.Net.Models;
 using BoneSpray.Net.Models.Attributes;
 using BoneSpray.Net.Models.Events;
-using BoneSpray.Net.Scenes;
 using BoneSpray.Net.Services;
 using BoneSpray.Net.Visuals.Models.Models.Attributes;
 using BoneSpray.Net.Visuals.Scenes;
@@ -20,6 +19,11 @@ namespace BoneSpray.Net.Visuals
     public static class VisualsControlService
     {
         /// <summary>
+        /// The Veldrid rendering GraphicsDevice.
+        /// </summary>
+        public static GraphicsDevice GraphicsDevice;
+
+        /// <summary>
         /// A container for all Renderers.
         /// </summary>
         private static Dictionary<string, BaseRenderer> Renderers { get; set; } = new Dictionary<string, BaseRenderer>();
@@ -30,11 +34,45 @@ namespace BoneSpray.Net.Visuals
         public static Dictionary<Type, Type> SceneToRendererMap { get; set; } = new Dictionary<Type, Type>();
 
         /// <summary>
+        /// The startup state of the graphics window. E.g. windowed, fullscreen, etc.
+        /// </summary>
+        private const WindowState StartupWindowState = WindowState.BorderlessFullScreen;
+
+        /// <summary>
+        /// If we should run the window in Debug mode. This will render in a windowed view, smaller than the native
+        /// resolution, useful for debugging and checking different window outputs.
+        /// </summary>
+        private const bool DebugMode = true;
+
+        /// <summary>
+        /// The dimensions of our window.
+        /// </summary>
+        private const int WindowX = 3840;
+        private const int WindowY = 2160;
+        private const int WindowX_Debug = 1000;
+        private const int WindowY_Debug = 500;
+
+        /// <summary>
+        /// If the cursor is visible in the graphic window.
+        /// </summary>
+        private const bool CursorVisible = false;
+
+        /// <summary>
         /// The active renderer
         /// </summary>
         private static BaseRenderer ActiveRenderer { get; set; }
 
-        public static GraphicsDevice GraphicsDevice;
+        /// <summary>
+        /// The underlying graphics API to use.
+        /// DirectX is good for windows, although not cross platform. Maybe we'll be
+        /// mental one day and run on Linux, in which case OpenGL will be good.
+        /// </summary>
+        private const GraphicsBackend WindowGraphicsBackend = GraphicsBackend.Direct3D11;
+
+        /// <summary>
+        /// The SDL2 Graphics Window.
+        /// </summary>
+        private static Sdl2Window GraphicsWindow; 
 
         /// <summary>
         /// The main entry point for our visual app.
@@ -44,7 +82,7 @@ namespace BoneSpray.Net.Visuals
         public static void Run()
         {
             // Build our graphics window
-            var window = CreateWindow();
+            CreateWindow();
 
             // Find and Load all of our Renderers
             FindAllRenderers();
@@ -56,9 +94,9 @@ namespace BoneSpray.Net.Visuals
             BindToEvents();
 
             // Enter our render loop
-            while (window.Exists)
+            while (GraphicsWindow.Exists)
             {
-                window.PumpEvents();
+                GraphicsWindow.PumpEvents();
                 ActiveRenderer.Draw();
             }
         }
@@ -76,21 +114,21 @@ namespace BoneSpray.Net.Visuals
         /// <summary>
         /// Creates our native graphics window.
         /// </summary>
-        private static Sdl2Window CreateWindow()
+        private static void CreateWindow()
         {
             WindowCreateInfo windowCI = new WindowCreateInfo()
             {
                 X = 100,
                 Y = 100,
-                WindowHeight = 500,
-                WindowWidth = 500,
+                WindowHeight = DebugMode ? WindowY_Debug : WindowY,
+                WindowWidth = DebugMode ? WindowX_Debug : WindowX,
+                WindowInitialState = DebugMode ? WindowState.Normal : StartupWindowState,
                 WindowTitle = "Bone Spray"
             };
 
-            Sdl2Window window = VeldridStartup.CreateWindow(ref windowCI);
-            GraphicsDevice = VeldridStartup.CreateGraphicsDevice(window);
-
-            return window;
+            GraphicsWindow = VeldridStartup.CreateWindow(ref windowCI);
+            GraphicsWindow.CursorVisible = CursorVisible;
+            GraphicsDevice = VeldridStartup.CreateGraphicsDevice(GraphicsWindow, WindowGraphicsBackend);
         }
 
         /// <summary>
@@ -217,6 +255,11 @@ namespace BoneSpray.Net.Visuals
         public static void DisposeResources()
         {
             GraphicsDevice.Dispose();
+
+            foreach (var renderer in Renderers)
+            {
+                renderer.Value.DisposeResources();
+            }
         }
     }
 }
