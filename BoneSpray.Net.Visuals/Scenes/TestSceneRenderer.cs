@@ -2,12 +2,11 @@
 using BoneSpray.Net.Models.Attributes;
 using BoneSpray.Net.Scenes.Implementations;
 using BoneSpray.Net.Visuals.Models.Models.Attributes;
+using BoneSpray.Net.Visuals.Models.Models.Models;
 using BoneSpray.Net.Visuals.Models.Models.RenderObjects;
-using BoneSpray.Net.Visuals.Models.RenderObjects;
 using JackSharp.Ports;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Veldrid;
@@ -36,6 +35,9 @@ namespace BoneSpray.Net.Visuals.Scenes
         private Pipeline GraphicsPipeline;
         private ResourceSet GraphicsResourceSet;
 
+        private string _resourceDirectory = "Particles";
+        protected override string ResourceDirectory { get { return _resourceDirectory; } set { _resourceDirectory = value; } }
+
         public override void Draw()
         {
             if (!Initialised) { return; }
@@ -63,18 +65,18 @@ namespace BoneSpray.Net.Visuals.Scenes
 
         public override void CreateResources()
         {
-            ParticleBuffer = VisualsControlService.ResourceFactory.CreateBuffer(
+            ParticleBuffer = Factory.CreateBuffer(
                 new BufferDescription(
                     (uint)Unsafe.SizeOf<ParticleStruct>() * ParticleCount,
                     BufferUsage.StructuredBufferReadWrite,
                     (uint)Unsafe.SizeOf<ParticleStruct>()));
 
-            ComputeShader = VisualsControlService.ResourceFactory.CreateShader(new ShaderDescription(
+            ComputeShader = Factory.CreateShader(new ShaderDescription(
                 ShaderStages.Compute,
-                ReadEmbeddedAssetBytes($"ParticlesCompute.{GetExtension(VisualsControlService.GraphicsDevice.BackendType)}"),
+                ReadAssetBytes(AssetType.Shader, $"ParticlesCompute.{GetExtension(VisualsControlService.GraphicsDevice.BackendType)}"),
                 "CS"));
 
-            ResourceLayout particleStorageLayout = VisualsControlService.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(
+            ResourceLayout particleStorageLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("ParticlesBuffer", ResourceKind.StructuredBufferReadWrite, ShaderStages.Compute)));
 
             ComputePipelineDescription computePipelineDesc = new ComputePipelineDescription(
@@ -82,17 +84,17 @@ namespace BoneSpray.Net.Visuals.Scenes
                 new[] { particleStorageLayout },
                 1, 1, 1);
 
-            ComputePipeline = VisualsControlService.ResourceFactory.CreateComputePipeline(ref computePipelineDesc);
+            ComputePipeline = Factory.CreateComputePipeline(ref computePipelineDesc);
 
-            ComputeResourceSet = VisualsControlService.ResourceFactory.CreateResourceSet(new ResourceSetDescription(particleStorageLayout, ParticleBuffer));
+            ComputeResourceSet = Factory.CreateResourceSet(new ResourceSetDescription(particleStorageLayout, ParticleBuffer));
 
-            VertexShader = VisualsControlService.ResourceFactory.CreateShader(new ShaderDescription(
+            VertexShader = Factory.CreateShader(new ShaderDescription(
                 ShaderStages.Vertex,
-                ReadEmbeddedAssetBytes($"ParticlesVertex.{GetExtension(VisualsControlService.ResourceFactory.BackendType)}"),
+                ReadAssetBytes(AssetType.Shader, $"ParticlesVertex.{GetExtension(Factory.BackendType)}"),
                 "VS"));
-            FragmentShader = VisualsControlService.ResourceFactory.CreateShader(new ShaderDescription(
+            FragmentShader = Factory.CreateShader(new ShaderDescription(
                 ShaderStages.Fragment,
-                ReadEmbeddedAssetBytes($"ParticlesFragment.{GetExtension(VisualsControlService.ResourceFactory.BackendType)}"),
+                ReadAssetBytes(AssetType.Shader, $"ParticlesFragment.{GetExtension(Factory.BackendType)}"),
                 "FS"));
 
             ShaderSetDescription shaderSet = new ShaderSetDescription(
@@ -103,7 +105,7 @@ namespace BoneSpray.Net.Visuals.Scenes
                     FragmentShader
                 });
 
-            particleStorageLayout = VisualsControlService.ResourceFactory.CreateResourceLayout(new ResourceLayoutDescription(
+            particleStorageLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("ParticlesBuffer", ResourceKind.StructuredBufferReadOnly, ShaderStages.Vertex)));
 
             GraphicsPipelineDescription particleDrawPipelineDesc = new GraphicsPipelineDescription(
@@ -115,21 +117,14 @@ namespace BoneSpray.Net.Visuals.Scenes
                 new[] { particleStorageLayout },
                 MainSwapchain.Framebuffer.OutputDescription);
 
-            GraphicsPipeline = VisualsControlService.ResourceFactory.CreateGraphicsPipeline(ref particleDrawPipelineDesc);
+            GraphicsPipeline = Factory.CreateGraphicsPipeline(ref particleDrawPipelineDesc);
 
-            GraphicsResourceSet = VisualsControlService.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+            GraphicsResourceSet = Factory.CreateResourceSet(new ResourceSetDescription(
                 particleStorageLayout,
                 ParticleBuffer));
 
-            CommandList = VisualsControlService.ResourceFactory.CreateCommandList();
+            CommandList = Factory.CreateCommandList();
 
-            InitResources();
-
-            Initialised = true;
-        }
-
-        private void InitResources()
-        {
             CommandList.Begin();
 
             ParticleStruct[] initialParticles = new ParticleStruct[ParticleCount];
@@ -150,6 +145,8 @@ namespace BoneSpray.Net.Visuals.Scenes
 
             VisualsControlService.GraphicsDevice.SubmitCommands(CommandList);
             VisualsControlService.GraphicsDevice.WaitForIdle();
-}
+
+            Initialised = true;
+        }
     }
 }

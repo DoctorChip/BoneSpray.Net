@@ -1,4 +1,5 @@
-﻿using BoneSpray.Net.Visuals.Models.Models.RenderUtilities;
+﻿using BoneSpray.Net.Visuals.Models.Models.Models;
+using BoneSpray.Net.Visuals.Models.Models.RenderUtilities;
 using System.IO;
 using Veldrid;
 
@@ -31,6 +32,16 @@ namespace BoneSpray.Net.Visuals.Scenes
         protected Swapchain MainSwapchain { get; set; }
 
         /// <summary>
+        /// Proxy through to the ResourceFactory on our GraphicsDevice.
+        /// </summary>
+        protected ResourceFactory Factory => VisualsControlService.GraphicsDevice.ResourceFactory;
+
+        /// <summary>
+        /// The directory for the Renderer's assets, such as Shaders.
+        /// </summary>
+        protected abstract string ResourceDirectory { get; set; }
+
+        /// <summary>
         /// Construct the required objects for the scene, such as a Camera.
         /// </summary>
         public BaseRenderer()
@@ -38,6 +49,8 @@ namespace BoneSpray.Net.Visuals.Scenes
             Camera = new Camera(
                 VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX,
                 VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY);
+
+            MainSwapchain = VisualsControlService.GraphicsDevice.MainSwapchain;
         }
 
         /// <summary>
@@ -55,9 +68,13 @@ namespace BoneSpray.Net.Visuals.Scenes
         /// <summary>
         /// Read an embedded asset, by filename, returns a byte[]
         /// </summary>
-        protected byte[] ReadEmbeddedAssetBytes(string name)
+        protected byte[] ReadAssetBytes(AssetType type, string name)
         {
-            using (Stream stream = GetType().Assembly.GetManifestResourceStream(name))
+            var dir = type == AssetType.Shader ? "Shaders" : string.Empty;
+            var subdir = ResourceDirectory;
+            var path = Path.Combine(dir, subdir, name);
+
+            using (Stream stream = File.OpenRead(path))
             {
                 byte[] bytes = new byte[stream.Length];
                 using (MemoryStream ms = new MemoryStream(bytes))

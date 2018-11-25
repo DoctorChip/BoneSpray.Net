@@ -21,12 +21,7 @@ namespace BoneSpray.Net.Visuals
         /// <summary>
         /// The Veldrid rendering GraphicsDevice.
         /// </summary>
-        public static GraphicsDevice GraphicsDevice;
-
-        /// <summary>
-        /// The ResourceFactory for our GraphicsDevice.
-        /// </summary>
-        public static ResourceFactory ResourceFactory = GraphicsDevice.ResourceFactory;
+        public static GraphicsDevice GraphicsDevice { get; set; }
 
         /// <summary>
         /// If we should run the window in Debug mode. This will render in a windowed view, smaller than the native

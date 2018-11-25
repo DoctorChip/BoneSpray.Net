@@ -24,6 +24,9 @@ namespace BoneSpray.Net.Visuals.Scenes
         private Shader VertexShader;
         private Shader FragmentShader;
 
+        private string _resourceDirectory = "";
+        protected override string ResourceDirectory { get { return _resourceDirectory; } set { _resourceDirectory = value; } }
+
         public override void Draw()
         {
             CommandList.Begin();

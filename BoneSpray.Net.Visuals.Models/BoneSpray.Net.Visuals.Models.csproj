@@ -173,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\Attributes\BindPortAttribute.cs" />
+    <Compile Include="Models\Models\AssetType.cs" />
     <Compile Include="Models\RenderObjects\ParticleStruct.cs" />
     <Compile Include="Models\RenderUtilities\Camera.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
