@@ -8,6 +8,11 @@ namespace BoneSpray.Net
 {
     class Program
     {
+        /// <summary>
+        /// Should our client attempt to start JACK if it's not running?
+        /// </summary>
+        private const bool StartJack = true;
+
         static void Main(string[] args)
         {
             // #Style
@@ -52,7 +57,7 @@ namespace BoneSpray.Net
         static void InitaliseJack()
         {
             // Start JACK
-            var start = ClientControlService.Start();
+            var start = ClientControlService.Start(StartJack);
             if (!start) throw new Exception("Unable to connect to JACK server with C# Client.");
             Console.WriteLine("> JACK service started.");
 
