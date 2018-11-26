@@ -22,7 +22,7 @@ namespace BoneSpray.Net.Visuals
         /// <summary>
         /// The Veldrid rendering GraphicsDevice.
         /// </summary>
-        public static GraphicsDevice GraphicsDevice { get; set; }
+        public static GraphicsDevice GraphicsDevice { get; private set; }
 
         /// <summary>
         /// If we should run the window in Debug mode. This will render in a windowed view, smaller than the native
@@ -31,7 +31,8 @@ namespace BoneSpray.Net.Visuals
         public const bool DebugMode = true;
 
         /// <summary>
-        /// The dimensions of our window.
+        /// The dimensions of our window. Run at 4K for Release mode, and 1000x500 when in debug mode.
+        /// If debug mode, the window will not be full-screen.
         /// </summary>
         public const int WindowX = 3840;
         public const int WindowY = 2160;
@@ -49,7 +50,7 @@ namespace BoneSpray.Net.Visuals
         public static Dictionary<Type, Type> SceneToRendererMap { get; set; } = new Dictionary<Type, Type>();
 
         /// <summary>
-        /// The startup state of the graphics window. E.g. windowed, fullscreen, etc.
+        /// The startup state of the graphics window when in Release mode. E.g. windowed, fullscreen, etc.
         /// </summary>
         private const WindowState StartupWindowState = WindowState.BorderlessFullScreen;
 
@@ -139,7 +140,7 @@ namespace BoneSpray.Net.Visuals
 
             // Create and assign the GraphicsDevice to our window.
             GraphicsWindow = VeldridStartup.CreateWindow(ref windowCI);
-            GraphicsWindow.CursorVisible = CursorVisible;
+            GraphicsWindow.CursorVisible = DebugMode ? true : CursorVisible;
             GraphicsDevice = VeldridStartup.CreateGraphicsDevice(GraphicsWindow, WindowGraphicsBackend);
         }
 
