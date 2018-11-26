@@ -29,6 +29,11 @@ namespace BoneSpray.Net
             // Fire up our visuals woo
             Console.WriteLine("> Starting VELDRID window...");
             VisualsControlService.Run();
+
+            // When the app is closed, dispose all of our ports
+            DisposeAll();
+
+            return;
         }
 
         /// <summary>
@@ -74,6 +79,15 @@ namespace BoneSpray.Net
             var canRegisterAudio = SceneOrchestrator.ConnectScenesPorts(PortType.Audio);
             if (!canRegisterAudio || !canRegisterMidi) throw new Exception("Unable to connect ports for scenes.");
             Console.WriteLine("> Connected all scene ports to JACK.");
+        }
+
+        /// <summary>
+        /// Close all of our ports and stop our JACK client.
+        /// </summary>
+        static void DisposeAll()
+        {
+            PortControlService.DisposeAllPorts();
+            ClientControlService.Stop();
         }
 
         /// <summary>

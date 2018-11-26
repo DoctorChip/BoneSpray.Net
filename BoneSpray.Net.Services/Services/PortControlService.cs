@@ -85,5 +85,27 @@ namespace BoneSpray.Net.Services
 
             return true;
         }
+
+        /// <summary>
+        /// Stop all midi and audio ports.
+        /// </summary>
+        public static void DisposeAllPorts()
+        {
+            foreach (var port in AudioPorts)
+            {
+                if (port.Value.PortProcessor.IsConnectedToJack)
+                {
+                    port.Value.PortProcessor.Stop();
+                }
+            }
+
+            foreach (var port in MidiPorts)
+            {
+                if (port.Value.PortProcessor.IsConnectedToJack)
+                {
+                    port.Value.PortProcessor.Stop();
+                }
+            }
+        }
     }
 }

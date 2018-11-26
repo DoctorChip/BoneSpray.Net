@@ -89,7 +89,7 @@ namespace BoneSpray.Net.Visuals.Scenes
         /// Required for every scene. This scene will process the DeviceBuffers and pump them into the
         /// GraphicsDevice attached to the VisualsControlService, which renders to our window.
         /// </summary>
-        public abstract void Draw();
+        public abstract void Draw(float deltaSeconds);
 
         /// <summary>
         /// Build any resources such as vertex buffers, pipelines, etc. required for initialising our

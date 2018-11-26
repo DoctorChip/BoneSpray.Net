@@ -8,6 +8,7 @@ using JackSharp.Ports;
 using JackSharp.Processing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Veldrid;
@@ -94,11 +95,19 @@ namespace BoneSpray.Net.Visuals
             BindToEvents();
 
             // Enter our render loop
+            var sw = Stopwatch.StartNew();
+            var previousElapsed = sw.Elapsed.TotalSeconds;
+
             while (GraphicsWindow.Exists)
             {
+                var newElapsed = sw.Elapsed.TotalSeconds;
+                var deltaSeconds = (float)(newElapsed - previousElapsed);
+
                 GraphicsWindow.PumpEvents();
-                ActiveRenderer.Draw();
+                ActiveRenderer.Draw(deltaSeconds);
             }
+
+            DisposeResources();
         }
 
         /// <summary>
@@ -275,14 +284,14 @@ namespace BoneSpray.Net.Visuals
         /// </summary>
         public static void DisposeResources()
         {
-            // Dispose from this Service
-            GraphicsDevice.Dispose();
-
             // Dispose from all Renderers
             foreach (var renderer in Renderers)
             {
                 renderer.Value.DisposeResources();
             }
+
+            // Dispose from this Service
+            GraphicsDevice.Dispose();
         }
     }
 }

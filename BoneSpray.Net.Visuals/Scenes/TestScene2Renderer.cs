@@ -27,7 +27,7 @@ namespace BoneSpray.Net.Visuals.Scenes
         private string _resourceDirectory = "";
         protected override string ResourceDirectory { get { return _resourceDirectory; } set { _resourceDirectory = value; } }
 
-        public override void Draw()
+        public override void Draw(float deltaSeconds)
         {
             CommandList.Begin();
             CommandList.SetFramebuffer(VisualsControlService.GraphicsDevice.SwapchainFramebuffer);
