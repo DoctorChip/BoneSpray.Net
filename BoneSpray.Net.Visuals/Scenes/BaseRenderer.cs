@@ -1,5 +1,4 @@
 ﻿using BoneSpray.Net.Visuals.Models.Models.Models;
-using BoneSpray.Net.Visuals.Models.Models.RenderUtilities;
 using System.IO;
 using Veldrid;
 
@@ -30,6 +29,12 @@ namespace BoneSpray.Net.Visuals.Scenes
         /// Proxy through to the ResourceFactory on our GraphicsDevice.
         /// </summary>
         protected ResourceFactory Factory => VisualsControlService.GraphicsDevice.ResourceFactory;
+
+        /// <summary>
+        /// Window dimensions.
+        /// </summary>
+        protected int WindowX => VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX;
+        protected int WindowY => VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY;
 
         /// <summary>
         /// The directory for the Renderer's assets, such as Shaders.

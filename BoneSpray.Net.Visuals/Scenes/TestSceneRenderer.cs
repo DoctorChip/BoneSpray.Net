@@ -147,10 +147,7 @@ namespace BoneSpray.Net.Visuals.Scenes
 
             CommandList.Begin();
 
-            CommandList.UpdateBuffer(ScreenSizeBuffer, 0, new Vector4(
-                VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX,
-                VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY,
-                0, 0));
+            CommandList.UpdateBuffer(ScreenSizeBuffer, 0, new Vector4(WindowX, WindowY, 0, 0));
 
             var initialParticles = new ParticleInfo[ParticleCount];
             var r = new Random();
@@ -158,8 +155,8 @@ namespace BoneSpray.Net.Visuals.Scenes
             for (int i = 0; i < ParticleCount; i++)
             {
                 var pi = new ParticleInfo(
-                    new Vector2((float)(r.NextDouble() * (VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX)), 
-                                (float)(r.NextDouble() * (VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY))),
+                    new Vector2((float)(r.NextDouble() * WindowX), 
+                                (float)(r.NextDouble() * WindowY)),
                     new Vector2((float)(r.NextDouble() * 3), (float)(r.NextDouble() * 3)),
                     new Vector4(0.4f + (float)r.NextDouble() * .6f, 0.4f + (float)r.NextDouble() * .6f, 0.4f + (float)r.NextDouble() * .6f, 1));
                 initialParticles[i] = pi;

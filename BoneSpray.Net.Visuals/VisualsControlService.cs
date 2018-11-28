@@ -23,16 +23,16 @@ namespace BoneSpray.Net.Visuals
         /// If we should run the window in Debug mode. This will render in a windowed view, smaller than the native
         /// resolution, useful for debugging and checking different window outputs.
         /// </summary>
-        public const bool DebugMode = true;
+        public static bool DebugMode = true;
 
         /// <summary>
         /// The dimensions of our window. Run at 4K for Release mode, and 1000x500 when in debug mode.
         /// If debug mode, the window will not be full-screen.
         /// </summary>
-        public const int WindowX = 3840;
-        public const int WindowY = 2160;
-        public const int WindowX_Debug = 1000;
-        public const int WindowY_Debug = 500;
+        public static int WindowX = 3840;
+        public static int WindowY = 2160;
+        public static int WindowX_Debug = 1000;
+        public static int WindowY_Debug = 500;
 
         /// <summary>
         /// The startup state of the graphics window when in Release mode. E.g. windowed, fullscreen, etc.
@@ -103,7 +103,13 @@ namespace BoneSpray.Net.Visuals
 
             // Build our graphics window
             CreateWindow();
+        }
 
+        /// <summary>
+        /// Once our Graphics Device has been created, we can start to consume it.
+        /// </summary>
+        public static void BeginProcessing()
+        {
             // Find and Load all of our Renderers
             FindAllRenderers();
 
@@ -195,6 +201,9 @@ namespace BoneSpray.Net.Visuals
 
             // Build our graphics device using our config.
             GraphicsDevice = VeldridStartup.CreateGraphicsDevice(GraphicsWindow, GraphicsDeviceOptions, WindowGraphicsBackend);
+
+            // We can start consuming our GraphicsDevice.
+            BeginProcessing();
         }
 
         /// <summary>
@@ -266,6 +275,9 @@ namespace BoneSpray.Net.Visuals
         {
             // Register SceneChange event handler.
             SceneOrchestrator.SceneChanged += OnSceneChangedEventHandler;
+
+            // Window resize handler.
+            GraphicsWindow.Resized += OnWindowResizedHandler;
         }
 
 
@@ -314,6 +326,26 @@ namespace BoneSpray.Net.Visuals
                 if (castedAttr.Type != type) continue;
 
                 yield return castedAttr;
+            }
+        }
+
+        /// <summary>
+        /// Handle the window being resized.
+        /// </summary>
+        private static void OnWindowResizedHandler()
+        {
+            var newX = GraphicsWindow.Width;
+            var newY = GraphicsWindow.Height;
+
+            if (DebugMode)
+            {
+                WindowX_Debug = newX;
+                WindowY_Debug = newY;
+            }
+            else
+            {
+                WindowX = newX;
+                WindowY = newY;
             }
         }
 
