@@ -43,13 +43,13 @@ namespace BoneSpray.Net.Visuals.Scenes
         {
             if (!Initialised) { return; }
 
-            Camera.Update(deltaSeconds);
-
             CommandList.Begin();
+
             CommandList.SetPipeline(ComputePipeline);
             CommandList.SetComputeResourceSet(0, ComputeResourceSet);
             CommandList.SetComputeResourceSet(1, ComputeScreenSizeResourceSet);
             CommandList.Dispatch(1024, 1, 1);
+
             CommandList.SetFramebuffer(MainSwapchain.Framebuffer);
             CommandList.SetFullViewports();
             CommandList.SetFullScissorRects();
@@ -72,24 +72,24 @@ namespace BoneSpray.Net.Visuals.Scenes
         {
             ParticleBuffer = Factory.CreateBuffer(
                 new BufferDescription(
-                    (uint)Unsafe.SizeOf<ParticleStruct>() * ParticleCount,
+                    (uint)Unsafe.SizeOf<ParticleInfo>() * ParticleCount,
                     BufferUsage.StructuredBufferReadWrite,
-                    (uint)Unsafe.SizeOf<ParticleStruct>()));
+                    (uint)Unsafe.SizeOf<ParticleInfo>()));
 
             ScreenSizeBuffer = Factory.CreateBuffer(new BufferDescription(16, BufferUsage.UniformBuffer));
 
             ComputeShader = Factory.CreateShader(new ShaderDescription(
                 ShaderStages.Compute,
-                ReadAssetBytes(AssetType.Shader, $"ParticlesCompute.{GetExtension(VisualsControlService.GraphicsDevice.BackendType)}"),
+                ReadAssetBytes(AssetType.Shader, "Compute"),
                 "CS"));
 
-            ResourceLayout particleStorageLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
+            var particleStorageLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("ParticlesBuffer", ResourceKind.StructuredBufferReadWrite, ShaderStages.Compute)));
 
-            ResourceLayout screenSizeLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
+            var screenSizeLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("ScreenSizeBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)));
 
-            ComputePipelineDescription computePipelineDesc = new ComputePipelineDescription(
+            var computePipelineDesc = new ComputePipelineDescription(
                 ComputeShader,
                 new[] { particleStorageLayout, screenSizeLayout },
                 1, 1, 1);
@@ -102,14 +102,15 @@ namespace BoneSpray.Net.Visuals.Scenes
 
             VertexShader = Factory.CreateShader(new ShaderDescription(
                 ShaderStages.Vertex,
-                ReadAssetBytes(AssetType.Shader, $"ParticlesVertex.{GetExtension(Factory.BackendType)}"),
+                ReadAssetBytes(AssetType.Shader, "Vertex"),
                 "VS"));
+
             FragmentShader = Factory.CreateShader(new ShaderDescription(
                 ShaderStages.Fragment,
-                ReadAssetBytes(AssetType.Shader, $"ParticlesFragment.{GetExtension(Factory.BackendType)}"),
+                ReadAssetBytes(AssetType.Shader, "Fragment"),
                 "FS"));
 
-            ShaderSetDescription shaderSet = new ShaderSetDescription(
+            var shaderSet = new ShaderSetDescription(
                 Array.Empty<VertexLayoutDescription>(),
                 new[]
                 {
@@ -123,7 +124,7 @@ namespace BoneSpray.Net.Visuals.Scenes
             screenSizeLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
                 new ResourceLayoutElementDescription("ScreenSizeBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)));
 
-            GraphicsPipelineDescription particleDrawPipelineDesc = new GraphicsPipelineDescription(
+            var particleDrawPipelineDesc = new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
                 DepthStencilStateDescription.Disabled,
                 RasterizerStateDescription.Default,
@@ -151,12 +152,12 @@ namespace BoneSpray.Net.Visuals.Scenes
                 VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY,
                 0, 0));
 
-            ParticleStruct[] initialParticles = new ParticleStruct[ParticleCount];
-            Random r = new Random();
+            var initialParticles = new ParticleInfo[ParticleCount];
+            var r = new Random();
 
             for (int i = 0; i < ParticleCount; i++)
             {
-                ParticleStruct pi = new ParticleStruct(
+                var pi = new ParticleInfo(
                     new Vector2((float)(r.NextDouble() * (VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX)), 
                                 (float)(r.NextDouble() * (VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY))),
                     new Vector2((float)(r.NextDouble() * 3), (float)(r.NextDouble() * 3)),

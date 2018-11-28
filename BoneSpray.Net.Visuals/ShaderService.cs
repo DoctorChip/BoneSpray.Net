@@ -11,7 +11,7 @@ namespace BoneSpray.Net.Visuals
             switch (VisualsControlService.GraphicsDevice.BackendType)
             {
                 case GraphicsBackend.Direct3D11:
-                    extension = "hlsl.bytes";
+                    extension = "hlsl";
                     break;
                 case GraphicsBackend.Vulkan:
                     extension = "spv";
@@ -22,7 +22,8 @@ namespace BoneSpray.Net.Visuals
                 case GraphicsBackend.Metal:
                     extension = "metallib";
                     break;
-                default: throw new System.InvalidOperationException();
+                default:
+                    throw new System.InvalidOperationException();
             }
 
             string entryPoint = stage == ShaderStages.Vertex ? "VS" : "FS";

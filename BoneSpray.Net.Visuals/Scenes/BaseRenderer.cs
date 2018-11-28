@@ -12,11 +12,6 @@ namespace BoneSpray.Net.Visuals.Scenes
     public abstract class BaseRenderer
     {
         /// <summary>
-        /// Our main camera for the scene.
-        /// </summary>
-        protected Camera Camera;
-
-        /// <summary>
         /// Is the Renderer ready? Set once all resources are ready.
         /// </summary>
         protected bool Initialised = false;
@@ -29,7 +24,7 @@ namespace BoneSpray.Net.Visuals.Scenes
         /// <summary>
         /// The renderers main swapchain.
         /// </summary>
-        protected Swapchain MainSwapchain { get; set; }
+        protected Swapchain MainSwapchain => VisualsControlService.GraphicsDevice.MainSwapchain;
 
         /// <summary>
         /// Proxy through to the ResourceFactory on our GraphicsDevice.
@@ -42,23 +37,11 @@ namespace BoneSpray.Net.Visuals.Scenes
         protected abstract string ResourceDirectory { get; set; }
 
         /// <summary>
-        /// Construct the required objects for the scene, such as a Camera.
-        /// </summary>
-        public BaseRenderer()
-        {
-            Camera = new Camera(
-                VisualsControlService.DebugMode ? VisualsControlService.WindowX_Debug : VisualsControlService.WindowX,
-                VisualsControlService.DebugMode ? VisualsControlService.WindowY_Debug : VisualsControlService.WindowY);
-
-            MainSwapchain = VisualsControlService.GraphicsDevice.MainSwapchain;
-        }
-
-        /// <summary>
         /// Get a shader resource extension based on the current backend type.
         /// </summary>
         protected string GetExtension(GraphicsBackend backendType)
         {
-            return backendType == GraphicsBackend.Direct3D11 ? "hlsl.bytes"
+            return backendType == GraphicsBackend.Direct3D11 ? "hlsl"
                 : backendType == GraphicsBackend.Vulkan ? "spv"
                     : backendType == GraphicsBackend.Metal ?  "metallib" 
                         : backendType == GraphicsBackend.OpenGL ? "430.glsl"
@@ -72,6 +55,8 @@ namespace BoneSpray.Net.Visuals.Scenes
         {
             var dir = type == AssetType.Shader ? "Shaders" : string.Empty;
             var subdir = ResourceDirectory;
+            name += $".{GetExtension(VisualsControlService.GraphicsDevice.BackendType)}";
+
             var path = Path.Combine(dir, subdir, name);
 
             using (Stream stream = File.OpenRead(path))

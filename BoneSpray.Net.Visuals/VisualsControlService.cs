@@ -20,11 +20,6 @@ namespace BoneSpray.Net.Visuals
     public static class VisualsControlService
     {
         /// <summary>
-        /// The Veldrid rendering GraphicsDevice.
-        /// </summary>
-        public static GraphicsDevice GraphicsDevice { get; private set; }
-
-        /// <summary>
         /// If we should run the window in Debug mode. This will render in a windowed view, smaller than the native
         /// resolution, useful for debugging and checking different window outputs.
         /// </summary>
@@ -40,16 +35,6 @@ namespace BoneSpray.Net.Visuals
         public const int WindowY_Debug = 500;
 
         /// <summary>
-        /// A container for all Renderers.
-        /// </summary>
-        private static Dictionary<string, BaseRenderer> Renderers { get; set; } = new Dictionary<string, BaseRenderer>();
-
-        /// <summary>
-        /// A map between the BoneSpray Scene objects and their renderers.
-        /// </summary>
-        public static Dictionary<Type, Type> SceneToRendererMap { get; set; } = new Dictionary<Type, Type>();
-
-        /// <summary>
         /// The startup state of the graphics window when in Release mode. E.g. windowed, fullscreen, etc.
         /// </summary>
         private const WindowState StartupWindowState = WindowState.BorderlessFullScreen;
@@ -60,11 +45,6 @@ namespace BoneSpray.Net.Visuals
         private const bool CursorVisible = false;
 
         /// <summary>
-        /// The active renderer
-        /// </summary>
-        private static BaseRenderer ActiveRenderer { get; set; }
-
-        /// <summary>
         /// The underlying graphics API to use.
         /// DirectX is good for windows, although not cross platform. Maybe we'll be
         /// mental one day and run on Linux, in which case OpenGL will be good.
@@ -72,9 +52,44 @@ namespace BoneSpray.Net.Visuals
         private const GraphicsBackend WindowGraphicsBackend = GraphicsBackend.Direct3D11;
 
         /// <summary>
+        /// If we should build our graphics device with a swapchain.
+        /// </summary>
+        public static bool UseSwapchain = true;
+
+        /// <summary>
+        /// Sync our buffer swap to the vertical blank.
+        /// </summary>
+        private static bool EnableVSync = true;
+
+        /// <summary>
         /// The SDL2 Graphics Window.
         /// </summary>
-        private static Sdl2Window GraphicsWindow; 
+        private static Sdl2Window GraphicsWindow;
+
+        /// <summary>
+        /// The active renderer
+        /// </summary>
+        private static BaseRenderer ActiveRenderer { get; set; }
+
+        /// <summary>
+        /// The Veldrid rendering GraphicsDevice.
+        /// </summary>
+        public static GraphicsDevice GraphicsDevice { get; private set; }
+
+        /// <summary>
+        /// The configuration for our graphics device.
+        /// </summary>
+        public static GraphicsDeviceOptions GraphicsDeviceOptions { get; private set; }
+
+        /// <summary>
+        /// A container for all Renderers.
+        /// </summary>
+        private static Dictionary<string, BaseRenderer> Renderers { get; set; } = new Dictionary<string, BaseRenderer>();
+
+        /// <summary>
+        /// A map between the BoneSpray Scene objects and their renderers.
+        /// </summary>
+        public static Dictionary<Type, Type> SceneToRendererMap { get; set; } = new Dictionary<Type, Type>();
 
         /// <summary>
         /// The main entry point for our visual app.
@@ -83,6 +98,9 @@ namespace BoneSpray.Net.Visuals
         /// </summary>
         public static void Run()
         {
+            // Build our graphics device options
+            BuildGraphicsDeviceOptions();
+
             // Build our graphics window
             CreateWindow();
 
@@ -123,7 +141,38 @@ namespace BoneSpray.Net.Visuals
         }
 
         /// <summary>
-        /// Creates our native graphics window.
+        /// Handle SceneChangeEvents, mapping the passed Scene type into a Render type.
+        /// </summary>
+        public static void OnSceneChangedEventHandler(object sender, OnSceneChangedEventArgs e)
+        {
+            // Try to find the Renderer for our new Scene that we are changing to.
+            var rendererFound = SceneToRendererMap.TryGetValue(e.ActiveScene, out var rendererType);
+            if (!rendererFound) return;
+
+            // Fetch the renderer.
+            var renderer = Renderers.SingleOrDefault(x => x.Value.GetType() == rendererType);
+
+            // Assign as Active.
+            SetActiveScene(renderer.Key);
+        }
+
+        /// <summary>
+        /// Build the configuration for our GraphicsDevice, such as if we should use a Swapchain.
+        /// </summary>
+        private static void BuildGraphicsDeviceOptions()
+        {
+            GraphicsDeviceOptions = new GraphicsDeviceOptions
+            {
+                HasMainSwapchain = UseSwapchain,
+                Debug = DebugMode,
+                SyncToVerticalBlank = EnableVSync,
+                SwapchainDepthFormat = PixelFormat.R16_UNorm,
+                ResourceBindingModel = ResourceBindingModel.Improved,
+            };
+        }
+
+        /// <summary>
+        /// Creates our native graphics window, including the GraphicsDevice.
         /// </summary>
         private static void CreateWindow()
         {
@@ -138,10 +187,14 @@ namespace BoneSpray.Net.Visuals
                 WindowTitle = "Bone Spray"
             };
 
-            // Create and assign the GraphicsDevice to our window.
+            // Create a window.
             GraphicsWindow = VeldridStartup.CreateWindow(ref windowCI);
+
+            // Only show the cursor in debug mode.
             GraphicsWindow.CursorVisible = DebugMode ? true : CursorVisible;
-            GraphicsDevice = VeldridStartup.CreateGraphicsDevice(GraphicsWindow, WindowGraphicsBackend);
+
+            // Build our graphics device using our config.
+            GraphicsDevice = VeldridStartup.CreateGraphicsDevice(GraphicsWindow, GraphicsDeviceOptions, WindowGraphicsBackend);
         }
 
         /// <summary>
@@ -215,22 +268,6 @@ namespace BoneSpray.Net.Visuals
             SceneOrchestrator.SceneChanged += OnSceneChangedEventHandler;
         }
 
-        /// <summary>
-        /// Handle SceneChangeEvents, mapping the passed Scene type into a Render type.
-        /// </summary>
-        public static void OnSceneChangedEventHandler(object sender, OnSceneChangedEventArgs e)
-        {
-            // Try to find the Renderer for our new Scene that we are changing to.
-            var rendererFound = SceneToRendererMap.TryGetValue(e.ActiveScene, out var rendererType);
-            if (!rendererFound) return;
-
-            // Fetch the renderer.
-            var renderer = Renderers.SingleOrDefault(x => x.Value.GetType() == rendererType);
-
-            // Assign as Active.
-            SetActiveScene(renderer.Key);
-        }
-
 
         /// <summary>
         /// Bind all our required ports in the visual scenes to the callback methods specified in the BindPort attributes.
@@ -283,7 +320,7 @@ namespace BoneSpray.Net.Visuals
         /// <summary>
         /// Dispose all of the render resources.
         /// </summary>
-        public static void DisposeResources()
+        private static void DisposeResources()
         {
             // Dispose from all Renderers
             foreach (var renderer in Renderers)
