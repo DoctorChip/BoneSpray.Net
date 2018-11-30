@@ -62,6 +62,11 @@ namespace BoneSpray.Net.Visuals.Scenes
             var subdir = ResourceDirectory;
             name += $".{GetExtension(VisualsControlService.GraphicsDevice.BackendType)}";
 
+            //if (type == AssetType.Shader && VisualsControlService.GraphicsDevice.BackendType == GraphicsBackend.Direct3D11)
+            //{
+            //    name += ".bytes";
+            //}
+
             var path = Path.Combine(dir, subdir, name);
 
             using (Stream stream = File.OpenRead(path))

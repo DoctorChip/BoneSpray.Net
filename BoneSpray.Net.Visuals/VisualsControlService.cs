@@ -23,7 +23,7 @@ namespace BoneSpray.Net.Visuals
         /// If we should run the window in Debug mode. This will render in a windowed view, smaller than the native
         /// resolution, useful for debugging and checking different window outputs.
         /// </summary>
-        public static bool DebugMode = true;
+        public static bool DebugMode = false;
 
         /// <summary>
         /// The dimensions of our window. Run at 4K for Release mode, and 1000x500 when in debug mode.

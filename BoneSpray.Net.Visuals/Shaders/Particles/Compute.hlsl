@@ -14,7 +14,7 @@ cbuffer ScreenSizeBuffer : register(b0)
 
 RWStructuredBuffer<ParticleInfo> Particles : register(u0);
 
-#define PARTICLE_COUNT 1024
+#define PARTICLE_COUNT 10000
 
 [numthreads(1, 1, 1)]
 void CS(uint3 dtid : SV_DispatchThreadID)

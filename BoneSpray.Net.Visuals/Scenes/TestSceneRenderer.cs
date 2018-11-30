@@ -22,7 +22,7 @@ namespace BoneSpray.Net.Visuals.Scenes
         /// <summary>
         /// The number of particles to render.
         /// </summary>
-        private const int ParticleCount = 1024;
+        private const int ParticleCount = 10000;
 
         private DeviceBuffer ParticleBuffer;
         private DeviceBuffer ScreenSizeBuffer;
@@ -48,7 +48,7 @@ namespace BoneSpray.Net.Visuals.Scenes
             CommandList.SetPipeline(ComputePipeline);
             CommandList.SetComputeResourceSet(0, ComputeResourceSet);
             CommandList.SetComputeResourceSet(1, ComputeScreenSizeResourceSet);
-            CommandList.Dispatch(1024, 1, 1);
+            CommandList.Dispatch(ParticleCount, 1, 1);
 
             CommandList.SetFramebuffer(MainSwapchain.Framebuffer);
             CommandList.SetFullViewports();
@@ -87,7 +87,7 @@ namespace BoneSpray.Net.Visuals.Scenes
                 new ResourceLayoutElementDescription("ParticlesBuffer", ResourceKind.StructuredBufferReadWrite, ShaderStages.Compute)));
 
             var screenSizeLayout = Factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("ScreenSizeBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)));
+                new ResourceLayoutElementDescription("ScreenSizeBuffer", ResourceKind.UniformBuffer, ShaderStages.Compute)));
 
             var computePipelineDesc = new ComputePipelineDescription(
                 ComputeShader,
